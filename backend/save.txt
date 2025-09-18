@@ -54,3 +54,37 @@ class User(AbstractUser):
 
     def __str__(self):
        return f'{self.username}'
+
+
+# FOODGRAM BACKEND - КОНТЕКСТ СЕССИИ (ОБНОВЛЕНО)
+
+ТЕКУЩИЙ ЭТАП: Модели Recipe, Tag, Ingredient созданы
+
+ВАЖНЫЕ РЕШЕНИЯ (НОВЫЕ):
+1. Модели рецептов созданы в recipes/models.py:
+   - Tag (тег): name, slug (уникальные)
+   - Ingredient (ингредиент): name, measurement_unit
+   - Recipe (рецепт): author, name, image, text, tags, ingredients, cooking_time
+   - IngredientsInRecipe (промежуточная модель): recipe, ingredient, amount
+
+2. Реализована сложная связь ManyToMany через промежуточную модель:
+   - ingredients = models.ManyToManyField(Ingredient, through='IngredientsInRecipe')
+   - Добавлен UniqueConstraint для предотвращения дубликатов ингредиентов в рецепте
+
+3. Соответствие ТЗ:
+   - Поля приведены в соответствие с ТЗ (name вместо title, text вместо description)
+   - Все обязательные поля добавлены
+
+ТЕХНИЧЕСКИЕ ДЕТАЛИ:
+- Использован get_user_model() для связи с кастомной моделью User
+- Добавлены валидаторы MinValueValidator для времени и количества
+- Настроены related_name для связей
+- Добавлены мета-данные (ordering, verbose_name)
+
+СЛЕДУЮЩИЕ ШАГИ:
+1. Настройка админки для моделей рецептов (recipes/admin.py)
+2. Создание и применение миграций
+3. Наполнение базы тестовыми данными
+4. Начало работы с API (сериализаторы, вьюсеты)
+
+КОММИТ: [Указать хэш коммита] - Созданы модели рецептов
