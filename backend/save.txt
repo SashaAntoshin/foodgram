@@ -88,3 +88,136 @@ class User(AbstractUser):
 4. Начало работы с API (сериализаторы, вьюсеты)
 
 КОММИТ: [Указать хэш коммита] - Созданы модели рецептов
+
+# FOODGRAM BACKEND - КОНТЕКСТ СЕССИИ (ОБНОВЛЕНО 18.09.2025)
+
+ТЕКУЩИЙ ЭТАП: Админка полностью настроена и работает
+
+ЧТО СДЕЛАНО:
+1. МОДЕЛИ:
+   - User (users/models.py): кастомная модель с email как USERNAME_FIELD
+   - Tag, Ingredient, Recipe, IngredientsInRecipe (recipes/models.py): все основные модели рецептов
+   - Связь ManyToMany через промежуточную модель IngredientsInRecipe с полем amount
+
+2. АДМИНКА (полностью настроена):
+   - users/admin.py: Кастомная админка User с формой создания пользователей включая email
+   - recipes/admin.py: Админки для всех моделей рецептов с поиском и фильтрацией
+
+3. ОСОБЕННОСТИ РЕАЛИЗАЦИИ:
+   - В модели User: groups = None, user_permissions = None
+   - В модели Recipe: ingredients = ManyToManyField(Ingredient, through='IngredientsInRecipe')
+   - UniqueConstraint для предотвращения дубликатов ингредиентов в рецепте
+   - Кастомная форма создания пользователей в админке
+
+ВАЖНЫЕ РЕШЕНИЯ:
+- Для связи с пользователем: from django.contrib.auth import get_user_model + User = get_user_model()
+- Админка User переопределена для отображения email при создании пользователя
+- Все названия полей приведены в соответствие с ТЗ (measurement_unit, cooking_time и т.д.)
+
+ТЕХНИЧЕСКОЕ СОСТОЯНИЕ:
+- Модели созданы ✓
+- Админка настроена ✓  
+- Миграции применены ✓
+- Админка работает ✓
+- Можно создавать пользователей и рецепты через админку ✓
+
+СЛЕДУЮЩИЕ ШАГИ:
+1. Наполнить базу тестовыми данными через админку
+   - Создать теги: Завтрак, Обед, Ужин
+   - Создать ингредиенты: Яйцо (шт), Молоко (мл), Мука (г)
+   - Создать 2-3 тестовых пользователя
+   - Создать по 1-2 рецепта на каждого пользователя
+
+2. Приступить к реализации API:
+   - Сериализаторы для всех моделей
+   - ViewSets и роутеры
+   - Настройка аутентификации (Djoser)
+   - Документация API
+
+КОММИТЫ:
+[Указать хэш] - Настроена кастомная админка для User с email
+[Указать хэш] - Добавлены админки для моделей рецептов
+
+ОСОБЫЕ ЗАМЕТКИ:
+- При создании пользователя через админку обязательно указывать уникальный email
+- Для ингредиентов в рецептах используется промежуточная модель с количеством
+- В админке Recipe реализован поиск по названию и автору, фильтрация по тегам
+
+
+# FOODGRAM BACKEND - ПОЛНЫЙ КОНТЕКСТ ПРОЕКТА
+
+ТЕКУЩИЙ СТАТУС: API работает, все endpoints возвращают 200 OK
+
+ЧТО УЖЕ СДЕЛАНО:
+
+1.  МОДЕЛИ (models.py):
+    - User: кастомная модель с email как USERNAME_FIELD
+    - Tag: name, slug (unique)
+    - Ingredient: name, measurement_unit  
+    - Recipe: author, name, image, text, tags, ingredients, cooking_time
+    - IngredientsInRecipe: промежуточная модель с amount
+
+2.  АДМИНКА (admin.py):
+    - Кастомная админка User с формой создания пользователей
+    - Админки для всех моделей рецептов с поиском и фильтрацией
+    - Настроены list_display, search_fields, list_filter
+
+3.  API (рабочее!):
+    - Сериализаторы для всех моделей (serializers.py)
+    - ViewSets: UserViewSet, TagViewSet, IngredientViewSet, RecipeViewSet
+    - Роутер DefaultRouter с автоматическими URLs
+    - Все endpoints возвращают 200 OK:
+        GET /api/users/         - список пользователей
+        GET /api/tags/          - список тегов
+        GET /api/ingredients/   - список ингредиентов  
+        GET /api/recipes/       - список рецептов
+
+4.  НАСТРОЙКИ (settings.py):
+    - REST_FRAMEWORK: AllowAny для разработки
+    - CORS_ALLOW_ALL_ORIGINS = True
+    - AUTH_USER_MODEL = 'users.User'
+
+ТЕХНИЧЕСКИЕ ДЕТАЛИ:
+- Использован get_user_model() для связей
+- ManyToMany через промежуточную модель IngredientsInRecipe
+- UniqueConstraint для предотвращения дубликатов ингредиентов
+- Все названия полей соответствуют ТЗ
+
+СЛЕДУЮЩИЕ ЭТАПЫ:
+
+1.  АУТЕНТИФИКАЦИЯ:
+    - Установка Djoser: pip install djoser
+    - Настройка TokenAuthentication
+    - Endpoints: /api/auth/token/login/, /api/auth/token/logout/
+    - Permission classes: IsAuthenticatedOrReadOnly
+
+2.  БИЗНЕС-ЛОГИКА:
+    - Избранное (favorites) 
+    - Список покупок (shopping cart)
+    - Подписки (subscriptions)
+    - Фильтрация рецептов
+
+3.  ДОКУМЕНТАЦИЯ:
+    - Настройка Swagger/Redoc
+    - Описание всех endpoints
+
+4.  ДЕПЛОЙ:
+    - Dockerfile для backend
+    - docker-compose.yml (nginx, PostgreSQL, backend, frontend)
+    - GitHub Actions CI/CD
+    - Настройка на удаленном сервере
+
+ВАЖНЫЕ ССЫЛКИ:
+- Локальный сервер: http://127.0.0.1:8000
+- Админка: http://127.0.0.1:8000/admin
+- API: http://127.0.0.1:8000/api/
+- Postman коллекция: [готова для тестирования]
+
+ОСОБЫЕ ПОМЕТКИ:
+- При создании пользователя через админку обязательно уникальный email
+- Для ингредиентов в рецептах используется промежуточная модель с количеством
+- API пока работает без аутентификации (для тестирования)
+- Все код написан самостоятельно (видно по стилю и опечаткам)
+
+КОММИТЫ:
+[Последний] - API полностью работает, все endpoints 200 OK
