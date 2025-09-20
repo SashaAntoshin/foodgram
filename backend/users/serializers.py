@@ -12,8 +12,10 @@ class DjoserUserCreateSerializer(UserCreateSerializer):
             'email',
             'username',
             'first_name',
-            'last_name'
+            'last_name',
+            'password'
         ]
+        extra_kwargs = {'password': {'write_only': True}}
 
 
 class DjoserUserSerializer(UserSerializer):

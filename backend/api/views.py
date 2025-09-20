@@ -16,11 +16,13 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-class RicepeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для Рецептов"""
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-
+    
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 class IngerientViewSet(viewsets.ModelViewSet):
     """Вьюсет для Ингридиентов"""

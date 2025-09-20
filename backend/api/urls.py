@@ -9,7 +9,7 @@ router = DefaultRouter()
 
 """Подключение роутеров для вьюсетов"""
 router.register('users', views.UserViewSet)
-router.register('recipes', views.RicepeViewSet)
+router.register('recipes', views.RecipeViewSet)
 router.register('tags', views.TagViewSet)
 router.register('ingredients', views.IngerientViewSet)
 
