@@ -221,3 +221,62 @@ class User(AbstractUser):
 
 КОММИТЫ:
 [Последний] - API полностью работает, все endpoints 200 OK
+
+
+
+Файл save.txt
+Проект: Foodgram API
+Дата: 20.09.2025
+Автор: Саня (под руководством ChatGPT)
+Что уже сделано:
+Модели (models.py)
+User: кастомная модель с email как USERNAME_FIELD.
+Tag: name, slug (уникальные).
+Ingredient: name, measurement_unit.
+Recipe: author, name, image, description, tags, ingredients, time, pub_date.
+IngredientsInRecipe: промежуточная модель с amount.
+Админка (admin.py)
+Кастомная админка User с формой создания и поиска пользователей.
+Админки для всех моделей рецептов с list_display, search_fields, list_filter.
+API (serializers.py, views.py)
+Сериализаторы для User, Tag, Ingredient, Recipe.
+ViewSets: UserViewSet, TagViewSet, IngredientViewSet, RecipeViewSet.
+Роутер DRF (DefaultRouter) с автоматическими URL.
+Все endpoints GET /api/... возвращают 200 OK.
+Авторизация через Djoser TokenAuth подключена и протестирована.
+Настройки (settings.py)
+REST_FRAMEWORK: AllowAny для разработки.
+CORS_ALLOW_ALL_ORIGINS = True.
+AUTH_USER_MODEL = 'users.User'.
+Рабочий функционал
+Создание пользователей через API (POST /api/users/) работает.
+Получение токена через /api/auth/token/login/.
+Создание рецептов через сериализатор с автором из request.user.
+Привязка тегов и ингредиентов через промежуточную модель.
+Поле image пока работает как обычный ImageField (base64 через drf-extra-fields подключали, но тестируем POST form-data).
+Что ещё нужно сделать по ТЗ:
+Аутентификация
+Проверка всех endpoints с правами IsAuthenticated/IsAuthenticatedOrReadOnly.
+Обновление и выход токена через Djoser.
+Бизнес-логика
+Favorites: добавление/удаление рецептов в избранное.
+Shopping cart: добавление/удаление рецептов, генерация суммированного списка ингредиентов в .txt.
+Subscriptions: подписка/отписка на авторов, отображение списка подписок.
+Фильтрация
+По тегам на страницах рецептов и избранного.
+Возможность комбинированной фильтрации «или».
+Создание и редактирование рецептов
+Проверка обязательных полей.
+Редактирование только своих рецептов.
+Статические страницы
+«О проекте» и «Технологии».
+Страница смены пароля.
+Документация
+Swagger/Redoc с описанием всех endpoints.
+Деплой
+Dockerfile backend, docker-compose (nginx, PostgreSQL, backend, frontend).
+CI/CD GitHub Actions.
+Настройка на удалённом сервере, сохранение данных в volumes.
+Тестовые данные
+Несколько пользователей разных уровней доступа.
+Рецепты для каждого пользователя.

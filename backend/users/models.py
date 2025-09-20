@@ -35,6 +35,10 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='users/avatars', blank=True, null=True)
     groups = None
     user_permissions = None
+    is_admin = models.BooleanField(
+        default=False,
+        verbose_name='Админ'
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'last_name']
