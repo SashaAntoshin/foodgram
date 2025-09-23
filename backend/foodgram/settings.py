@@ -136,6 +136,12 @@ DJOSER = {
     }
 }
 
+AUTH_PASSWORD_VALIDATORS = []
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+DEFAULT_FROM_EMAIL = 'noreply@example.com'
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 

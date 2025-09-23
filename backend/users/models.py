@@ -1,8 +1,8 @@
 from django.db import models
+from django.utils.crypto import get_random_string
+from django.contrib.auth.models import AbstractUser
 
-from django.contrib.auth.models import AbstractUser, BaseUserManager
-
-MAX_LENGTH = 200
+MAX_LENGTH = 150
 
 
 class User(AbstractUser):
@@ -45,7 +45,7 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         self.username = self.email
-        super().save(*args, **kwargs) 
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Пользователь'

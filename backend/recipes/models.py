@@ -51,7 +51,7 @@ class Ingredient(models.Model):
 
 
 class IngredientsInRecipe(models.Model):
-    "Модель для связи ингридиента и рецепта"
+    """Модель для связи ингридиента и рецепта"""
     recipe = models.ForeignKey(
         'Recipe',
         on_delete=models.CASCADE,
@@ -127,3 +127,71 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Favorites(models.Model):
+    """Модель избранного"""
+    favorite_cook = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite_recipe',
+        verbose_name='Избранное'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='saved',
+        verbose_name='Избранные блюда'
+    )
+    added_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата добавления'
+    )
+
+    class Meta:
+        ordering = ['-added_at']
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные рецепты'
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['favorite_cook', 'recipe'],
+                name='unique_favorite'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.favorite_cook.username} -> {self.recipe.name}'
+
+
+class ShoppingBasket(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_basket',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='in_shopping_basket',
+        verbose_name='Рецепт'
+    )
+    added_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата добавления'
+    )
+
+    class Meta:
+        ordering = ['-added_at']
+        verbose_name = 'Корзина покупок'
+        verbose_name_plural = 'Корзины покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shopping_cart'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.recipe.name} (корзина)'

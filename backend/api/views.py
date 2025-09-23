@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions
+from users.utils import send_mail
 
 from users.models import User
 from recipes.models import Recipe, Ingredient, Tag
@@ -22,8 +23,16 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.AllowAny()]
         return super().get_permissions()
-        
-
+    
+    def perform_create(self, serializer):
+        """Пользователь и код подтверждения"""
+        user = serializer.save()
+        send_mail(
+            subject="Добро пожаловать!",
+            message="Вы успешно зарегистрированы!",
+            from_email=None,
+            recipient_list=[user.email],
+        )
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для Рецептов"""
