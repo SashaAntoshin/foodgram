@@ -1,6 +1,4 @@
 from rest_framework import serializers
-from drf_extra_fields.fields import Base64ImageField
-
 from users.models import User
 from recipes.models import (
     Recipe,
@@ -11,14 +9,14 @@ from recipes.models import (
     ShoppingBasket
 )
 
-
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели юзера"""
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'username', 'password')
+        fields = ('id', 'first_name', 'last_name',
+                  'email', 'username', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -27,8 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-
-
+    
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор модели Тег"""
     class Meta:
@@ -89,6 +86,39 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=item['amount']
             )
         return recipe
+
+    def validate(self, attrs):
+        ingredients_list = attrs.get('ingredients')
+        if not isinstance(ingredients_list, list) or len(ingredients_list) == 0:
+            raise serializers.ValidationError(
+                'Cписок не может быть пустым'
+            )
+
+        ingredients = attrs['ingredients']
+        ingredient_ids = []
+        bad_positions = []
+        for index, item in enumerate(ingredients):
+            if not isinstance(item, dict) or 'id' not in item:
+                bad_positions.append(index)
+                continue
+            ingredient_ids.append(item['id'])
+
+        if bad_positions:
+            raise serializers.ValidationError(
+                {'ingredients': f'Некорректные элементы на позициях: {bad_positions}'}
+            )
+
+        id_counter = {}
+        for ing_id in ingredient_ids:
+            id_counter[ing_id] = id_counter.get(ing_id, 0) + 1
+        repeated_ids = sorted(
+            [ing_id for ing_id, cnt in id_counter.items() if cnt > 1])
+        if repeated_ids:
+            readable = ', '.join(str(x) for x in repeated_ids)
+            raise serializers.ValidationError(
+                {'ingredients': f'Повторяются ингредиенты с id: {readable}'}
+            )
+        return attrs
 
 
 class FavoritesAndBasketSerializer(serializers.ModelSerializer):

@@ -53,3 +53,36 @@ class User(AbstractUser):
 
     def __str__(self):
        return f'{self.username}'
+    
+
+class Follow(models.Model):
+    """Модель подписок"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='followings',
+        verbose_name='подписчик'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='followers',
+        verbose_name='автор'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='дата подписки'
+    )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_follow'
+            )
+        ]
+    
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'
