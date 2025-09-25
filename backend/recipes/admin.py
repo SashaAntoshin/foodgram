@@ -23,13 +23,13 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author__username')
     list_filter = ('tags',)
     filter_horizontal = ('tags',)
-    
+
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'unit')
+    list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
-    
+
 
 @admin.register(IngredientsInRecipe)
 class IngredientInRecipeAdmin(admin.ModelAdmin):
@@ -45,6 +45,6 @@ class ShoppingBasketAdmin(admin.ModelAdmin):
 
 @admin.register(Favorites)
 class FavoritesAdmin(admin.ModelAdmin):
-    list_display = ('favorite_cook', 'recipe', 'added_at')
+    list_display = ('user', 'recipe', 'added_at')
     list_filter = ('added_at',)
-    search_fields = ('favorite_cook__username', 'recipe__name')
+    search_fields = ('user__username', 'recipe__name')

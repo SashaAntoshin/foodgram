@@ -32,7 +32,11 @@ class User(AbstractUser):
         help_text='Обязательное поле',
         blank=False
     )
-    avatar = models.ImageField(upload_to='users/avatars', blank=True, null=True)
+    avatar = models.ImageField(
+        upload_to='users/avatars', 
+        blank=True, null=True,
+        verbose_name='аватар'
+        )
     groups = None
     user_permissions = None
     is_admin = models.BooleanField(

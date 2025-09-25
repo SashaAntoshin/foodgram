@@ -37,7 +37,7 @@ class Ingredient(models.Model):
         max_length=MAX_LENGTH,
         verbose_name='Название ингридиента'
     )
-    unit = models.CharField(
+    measurement_unit = models.CharField(
         max_length=MAX_LENGTH,
         verbose_name='Единица измерения'
     )
@@ -110,7 +110,7 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Ингредиенты'
     )
-    time = models.PositiveSmallIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)],
         verbose_name='Время приготовления',
         help_text='Время в минутах'
@@ -131,7 +131,7 @@ class Recipe(models.Model):
 
 class Favorites(models.Model):
     """Модель избранного"""
-    favorite_cook = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='favorite_recipe',
@@ -155,13 +155,13 @@ class Favorites(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=['favorite_cook', 'recipe'],
+                fields=['user', 'recipe'],
                 name='unique_favorite'
             )
         ]
 
     def __str__(self):
-        return f'{self.favorite_cook.username} -> {self.recipe.name}'
+        return f'{self.user.username} -> {self.recipe.name}'
 
 
 class ShoppingBasket(models.Model):
