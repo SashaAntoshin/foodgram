@@ -1,49 +1,69 @@
 from rest_framework import viewsets, status, generics, filters
 from rest_framework.decorators import action
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from recipes.models import Recipe, Ingredient, Tag, Favorites
 from .pagination import CustomPagination
 from api.serializers import (
-    RecipeSerializer,
     IngredientSerializer,
     TagSerializer,
-    FavoritesSerializer
+    FavoritesSerializer, RecipeReadSerializer, RecipeWriteSerializer
 )
-from .permissions import IsAdminOrReadOnly, IsAuthorOrIsAdmin
+from .permissions import IsAdminOrReadOnly, IsAuthorOrIsAdmin, IsAuthorOrReadOnly
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Вьюсет для Рецептов"""
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthorOrIsAdmin, IsAuthorOrReadOnly]
     pagination_class = CustomPagination
+    filterset_fields = ['author', 'tags']
 
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return RecipeReadSerializer
+        return RecipeWriteSerializer
+    
+    def get_queryset(self):
+        """Фильтрация по авторам и тегам"""
+        queryset = super().get_queryset()
+        author_id = self.request.query_params.get('author')
+        if author_id:
+            queryset = queryset.filter(author_id=author_id)
+        tags = self.request.query_params.getlist('tags')
+        if tags:
+            queryset = queryset.filter(tags__slug__in=tags).distinct()
+        return queryset
+    
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        self.instance = serializer.save(author=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        super().create(request, *args, **kwargs)
+        read_serializer = RecipeReadSerializer(self.instance, context={'request': self.request})
+        return Response(read_serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_update(self, serializer):
+        self.instance = serializer.save()
 
     def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        
-        # ПРОВЕРКА: пользователь может обновлять только свои рецепты
-        if instance.author != request.user:
-            return Response(
-                {'detail': 'У вас нет прав для изменения этого рецепта'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        return super().update(request, *args, **kwargs)
+        response = super().update(request, *args, **kwargs)
+        recipe = self.get_object()
+        return Response(
+            {"link": f"http://{request.get_host()}/recipes/{recipe.id}/"},
+            status=status.HTTP_200_OK
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        super().partial_update(request, *args, **kwargs)
+        read_serializer = RecipeReadSerializer(self.instance, context={'request': self.request})
+        return Response(read_serializer.data, status=status.HTTP_200_OK)
+
     
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
-        """
-        Эндпоинт для получения ссылки на рецепт
-        """
+        """Получение ссылки на рецепт"""
         recipe = self.get_object()
-        
-        # Генерируем ссылку на рецепт
         recipe_url = request.build_absolute_uri(f'/recipes/{recipe.id}/')
         
         return Response({
