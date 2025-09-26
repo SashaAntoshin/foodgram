@@ -40,6 +40,55 @@ class UserViewSet(viewsets.ModelViewSet):
             from_email=None,
             recipient_list=[user.email],
         )
+    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    def subscribe(self, request, pk=None):
+        """Подписка/отписка на автора"""
+        author = self.get_object()
+        user = request.user
+
+        if request.method == 'POST':
+            # Проверки
+            if user == author:
+                return Response(
+                    {'detail': 'Нельзя подписаться на себя'}, 
+                    status=400
+                )
+            if Follow.objects.filter(user=user, author=author).exists():
+                return Response(
+                    {'detail': 'Вы уже подписаны'}, 
+                    status=400
+                )
+            
+            # Создаем подписку
+            Follow.objects.create(user=user, author=author)
+            return Response(status=201)
+
+        elif request.method == 'DELETE':
+            # Отписка
+            follow = Follow.objects.filter(user=user, author=author).first()
+            if not follow:
+                return Response(
+                    {'detail': 'Подписка не найдена'}, 
+                    status=400
+                )
+            follow.delete()
+            return Response(status=204)
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        """Список моих подписок"""
+        user = request.user
+        # Авторы на которых подписан пользователь
+        subscribed_authors = User.objects.filter(following__user=user)
+        
+        # Пагинация
+        page = self.paginate_queryset(subscribed_authors)
+        if page is not None:
+            serializer = UserLIstSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = UserLIstSerializer(subscribed_authors, many=True, context={'request': request})
+        return Response(serializer.data)
+
 
 class UserListView(APIView):
     """Отдельный вью только для списка пользователей"""

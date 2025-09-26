@@ -124,19 +124,45 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         Token.objects.get_or_create(user=user)
         return user
 
-
+class RecipeShortSerializer(serializers.ModelSerializer):
+    """Вспомогательный сериализатор пецептов"""
+    
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 class UserLIstSerializer(serializers.ModelSerializer):
     """Сериализатор информации пользователя"""
     is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar')
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'is_subscribed', 'recipes',
+                'recipes_count', 'avatar')
 
     def get_is_subscribed(self, obj):
         return False
+    
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+    
+    def get_recipes(self, obj):
+        """Рецепты пользователя с ограничением через recipes_limit"""
+        request = self.context.get('request')
+        recipes_limit = None
+        
+        if request:
+            recipes_limit = request.query_params.get('recipes_limit')
+        
+        recipes = obj.recipes.all()
+        
+        if recipes_limit and recipes_limit.isdigit():
+            recipes = recipes[:int(recipes_limit)]
+        from api.serializers import RecipeShortSerializer
+        return RecipeShortSerializer(recipes, many=True, context=self.context).data
     
     def get_avatar(self, obj):
         """Вернем ссылку на аватар, если он есть"""
@@ -146,6 +172,25 @@ class UserLIstSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
         return None
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = ('user', 'author')
+        read_only_fields = ('user',)
+
+    def validate(self, attrs):
+        author = attrs.get('author')
+        user = self.context['request'].user
+        
+        if author == user:
+            raise serializers.ValidationError('Нельзя подписаться на себя')
+        
+        if Follow.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError('Вы уже подписаны')
+        
+        return attrs
     
 
 class AvatarUpdateSerializer(serializers.ModelSerializer):
