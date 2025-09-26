@@ -27,16 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
             'email', 'username', 'password'
         )
         extra_kwargs = {'password': {'write_only': True}}
-        username = serializers.CharField(
-        validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+\Z',
-                message='Недопустимые символы в username',
-                code='invalid_username'
-            )
-        ]
-    )
-    
+        username = serializers.CharField(max_length=150)
+
     def get_is_subscribed(self, obj):
         request_user = self.context['request'].user
         if request_user.is_authenticated:
@@ -44,7 +36,6 @@ class UserSerializer(serializers.ModelSerializer):
                 return False
             return obj.followers.filter(user=request_user).exists()
         return False
-
     def get_avatar(self, obj):
         if obj.avatar:
             request = self.context.get('request')
@@ -58,6 +49,28 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+
+class UserLIstSerializer(serializers.ModelSerializer):
+    """Сериализатор информации пользователя"""
+    is_subscribed = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar')
+
+    def get_is_subscribed(self, obj):
+        return False
+    
+    def get_avatar(self, obj):
+        """Вернем ссылку на аватар, если он есть"""
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
     
 
 class AvatarUpdateSerializer(serializers.ModelSerializer):
@@ -92,7 +105,6 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         model = IngredientsInRecipe
         fields = ('ingredient', 'amount')
 
-
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор модели Рецепт"""
     image = serializers.ImageField()
@@ -115,8 +127,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'author', 'name', 'image',
-            'description', 'pub_date', 'cooking_time',
-            'ingredients', 'tags',
+            'text', 'pub_date', 'cooking_time',
+            'ingredients', 'tags', 'ingredients_detail'
         )
 
     def create(self, validated_data):

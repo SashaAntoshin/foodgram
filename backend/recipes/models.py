@@ -98,7 +98,7 @@ class Recipe(models.Model):
         verbose_name='Фото'
 
     )
-    description = models.TextField(verbose_name='Оисание рецепта')
+    text = models.TextField(verbose_name='Оисание рецепта')
     tags = models.ManyToManyField(
         Tag,
         related_name='recipes',

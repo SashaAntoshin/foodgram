@@ -3,7 +3,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from . import views
-from users.views import FollowViewSet, UserViewSet, MeView, UserAvatarView, ChangePassword, LogoutView
+from users.views import FollowViewSet, UserViewSet, MeView, UserAvatarView, ChangePassword, LogoutView, UserListView
 
 router = DefaultRouter()
 
@@ -21,4 +21,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('favorites/', views.FavoriteListView.as_view(), name='favorite-list'),
 	path('api/auth/token/logout/', LogoutView.as_view(), name='logout'),
+	path('api/users-list/', UserListView.as_view()),
 ]

@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
 from .models import User, Follow
 from rest_framework.response import Response
-from api.serializers import UserSerializer, FollowSerializer, AvatarUpdateSerializer
+from api.serializers import UserSerializer, FollowSerializer, AvatarUpdateSerializer, UserLIstSerializer
 from users.utils import send_mail
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -25,41 +25,11 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action in ['create', 'list', 'retrieve']:
             return [permissions.AllowAny()]
         return super().get_permissions()
-    
-    @action(detail=False, methods=['post'], url_path='validate-username')
-    def validate_username(self, request):
-        """Валидация username перед регистрацией"""
-        username = request.data.get('username', '').strip()
-        
-        if not username:
-            return Response(
-                {'error': 'Username обязателен'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Проверка regex
-        import re
-        if not re.match(r'^[\w.@+-]+\Z', username):
-            return Response(
-                {'error': 'Username содержит недопустимые символы'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Проверка уникальности
-        if User.objects.filter(username=username).exists():
-            return Response(
-                {'error': 'Этот username уже занят'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        return Response(
-            {'success': 'Username доступен'}, 
-            status=status.HTTP_200_OK
-        )
 
-    def get_serializer(self, *args, **kwargs):
-        kwargs['context'] = self.get_serializer_context()
-        return super().get_serializer(*args, **kwargs)
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserSerializer
+        return UserLIstSerializer
 
     def perform_create(self, serializer):
         """Пользователь и код подтверждения"""
@@ -71,13 +41,22 @@ class UserViewSet(viewsets.ModelViewSet):
             recipient_list=[user.email],
         )
 
+class UserListView(APIView):
+    """Отдельный вью только для списка пользователей"""
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserLIstSerializer(users, many=True)
+        return Response(serializer.data)
+
 
 class MeView(APIView):
     """Вью для user/me"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserSerializer(request.user, context={'request': request})
+        serializer = UserLIstSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
 
