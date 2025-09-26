@@ -24,6 +24,32 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        # ПРОВЕРКА: пользователь может обновлять только свои рецепты
+        if instance.author != request.user:
+            return Response(
+                {'detail': 'У вас нет прав для изменения этого рецепта'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        return super().update(request, *args, **kwargs)
+    
+    @action(detail=True, methods=['get'], url_path='get-link')
+    def get_link(self, request, pk=None):
+        """
+        Эндпоинт для получения ссылки на рецепт
+        """
+        recipe = self.get_object()
+        
+        # Генерируем ссылку на рецепт
+        recipe_url = request.build_absolute_uri(f'/recipes/{recipe.id}/')
+        
+        return Response({
+            'link': recipe_url
+        }, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=('post', 'delete'), permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         recipe = self.get_object()
