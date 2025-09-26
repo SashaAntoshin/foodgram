@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from recipes.models import Recipe, Ingredient, Tag, Favorites
+from recipes.models import Recipe, Ingredient, Tag, Favorites, ShoppingBasket
 from .pagination import CustomPagination
 from api.serializers import (
     IngredientSerializer,
@@ -89,6 +89,80 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Рецепт не найден'}, status=status.HTTP_400_BAD_REQUEST)
         favor.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+    @action(detail=True, methods=('post', 'delete'), permission_classes=[IsAuthenticated], url_path='shopping_cart')
+    def shopping_cart(self, request, pk=None):
+        """Добавление и удаление рецепта в корзину"""
+        recipe = self.get_object()
+        user = request.user
+        if request.method == 'POST':
+            if ShoppingBasket.objects.filter(
+                user=user,
+                recipe=recipe
+            ).exists():
+                return Response(
+                    {'detail': 'Рецепт уже в корзине'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            ShoppingBasket.objects.create(user=user, recipe=recipe)
+            return Response(
+                {'detail': 'Добавлено в корзину'}, 
+                status=status.HTTP_201_CREATED 
+            )
+        elif request.method == 'DELETE':
+            """Удвление из корзины"""
+            recipe_item = ShoppingBasket.objects.filter(
+                user=user, recipe=recipe
+            ).first()
+            if not recipe_item:
+                if not recipe_item:
+                    return Response(
+                        {'detail': 'Рецепт не найден в корзине'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            recipe_item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def download_shopping_cart(self, request):
+        """
+        Скачивание списка покупок
+        URL: /api/recipes/download_shopping_cart/
+        """
+        user = request.user
+        
+        # Получаем рецепты из корзины пользователя
+        shopping_cart_items = ShoppingBasket.objects.filter(user=user)
+        recipes = [item.recipe for item in shopping_cart_items]
+        
+        # Формируем список ингредиентов
+        ingredients_dict = {}
+        
+        for recipe in recipes:
+            for ingredient_amount in recipe.ingredients_amounts.all():
+                ingredient = ingredient_amount.ingredient
+                amount = ingredient_amount.amount
+                
+                key = (ingredient.name, ingredient.measurement_unit)
+                if key in ingredients_dict:
+                    ingredients_dict[key] += amount
+                else:
+                    ingredients_dict[key] = amount
+        
+        # Создаем текстовый файл
+        shopping_list = "Список покупок:\n\n"
+        for (name, unit), amount in ingredients_dict.items():
+            shopping_list += f"• {name} - {amount} {unit}\n"
+        
+        shopping_list += f"\nВсего ингредиентов: {len(ingredients_dict)}"
+        
+        # Возвращаем текстовый файл
+        from django.http import HttpResponse
+        response = HttpResponse(shopping_list, content_type='text/plain; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
+        return response
 
 
 class FavoriteListView(generics.ListAPIView):

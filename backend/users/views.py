@@ -47,7 +47,6 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
 
         if request.method == 'POST':
-            # Проверки
             if user == author:
                 return Response(
                     {'detail': 'Нельзя подписаться на себя'}, 
@@ -58,13 +57,10 @@ class UserViewSet(viewsets.ModelViewSet):
                     {'detail': 'Вы уже подписаны'}, 
                     status=400
                 )
-            
-            # Создаем подписку
             Follow.objects.create(user=user, author=author)
             return Response(status=201)
 
         elif request.method == 'DELETE':
-            # Отписка
             follow = Follow.objects.filter(user=user, author=author).first()
             if not follow:
                 return Response(
@@ -72,15 +68,13 @@ class UserViewSet(viewsets.ModelViewSet):
                     status=400
                 )
             follow.delete()
-            return Response(status=204)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         """Список моих подписок"""
         user = request.user
-        # Авторы на которых подписан пользователь
         subscribed_authors = User.objects.filter(following__user=user)
-        
-        # Пагинация
         page = self.paginate_queryset(subscribed_authors)
         if page is not None:
             serializer = UserLIstSerializer(page, many=True, context={'request': request})
