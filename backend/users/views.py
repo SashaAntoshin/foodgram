@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
 from .models import User, Follow
 from rest_framework.response import Response
-from api.serializers import UserSerializer, FollowSerializer, AvatarUpdateSerializer, UserLIstSerializer
+from api.serializers import UserSerializer, FollowSerializer, AvatarUpdateSerializer, UserLIstSerializer, UserRegistrationSerializer
 from users.utils import send_mail
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -28,7 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return UserSerializer
+            return UserRegistrationSerializer
         return UserLIstSerializer
 
     def perform_create(self, serializer):
