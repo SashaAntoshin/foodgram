@@ -134,14 +134,11 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 class UserLIstSerializer(serializers.ModelSerializer):
     """Сериализатор информации пользователя"""
     is_subscribed = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'is_subscribed', 'recipes',
-                'recipes_count', 'avatar')
+        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed', 'avatar')
 
     def get_is_subscribed(self, obj):
         return False
@@ -173,25 +170,6 @@ class UserLIstSerializer(serializers.ModelSerializer):
             return obj.avatar.url
         return None
 
-
-class FollowSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Follow
-        fields = ('user', 'author')
-        read_only_fields = ('user',)
-
-    def validate(self, attrs):
-        author = attrs.get('author')
-        user = self.context['request'].user
-        
-        if author == user:
-            raise serializers.ValidationError('Нельзя подписаться на себя')
-        
-        if Follow.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError('Вы уже подписаны')
-        
-        return attrs
-    
 
 class AvatarUpdateSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField(required=True)
@@ -356,20 +334,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return instance
 
 
-class SubscribeSerializer(serializers.ModelSerializer):
-    """Сериализатор подписок"""
-    class Meta:
-        model = Follow
-        fields = ('user', 'author')
-
-    def validate(self, data):
-        if data['user'] == data['author']:
-            raise serializers.ValidationError('Нельзя подписаться на себя.')
-        if Follow.objects.filter(user=data['user'], author=data['author']).exists():
-            raise serializers.ValidationError('Уже подписан.')
-        return data
-
-
 class FavoritesSerializer(serializers.ModelSerializer):
     """Сериализатор для Избранного"""
     class Meta:
@@ -413,3 +377,56 @@ class FollowSerializer(serializers.ModelSerializer):
                 'Вы уже подписались на этого автора ранее'
             )
         return value
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор списка подписок (/subscriptions/)."""
+    is_subscribed = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+            'avatar',
+        )
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user.follower.filter(author=obj).exists()
+        return False
+
+    def get_avatar(self, obj):
+        request = self.context.get('request')
+        if obj.avatar and request:
+            return request.build_absolute_uri(obj.avatar.url)
+        return None
+
+    def get_recipes(self, obj):
+        recipes = obj.recipes.all()
+        request = self.context.get('request')
+        recipes_limit = self.context.get('recipes_limit')
+        if recipes_limit:
+            recipes = recipes[:recipes_limit]
+        return [
+            {
+                'id': recipe.id,
+                'name': recipe.name,
+                'image': request.build_absolute_uri(recipe.image.url) if recipe.image else None,
+                'cooking_time': recipe.cooking_time,
+            }
+            for recipe in recipes
+        ]
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()

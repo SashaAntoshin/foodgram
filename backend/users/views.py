@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
 from .models import User, Follow
 from rest_framework.response import Response
-from api.serializers import UserSerializer, FollowSerializer, AvatarUpdateSerializer, UserLIstSerializer, UserRegistrationSerializer
+from api.serializers import UserSerializer, FollowSerializer, AvatarUpdateSerializer, UserLIstSerializer, UserRegistrationSerializer, SubscriptionSerializer
 from users.utils import send_mail
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -40,6 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
             from_email=None,
             recipient_list=[user.email],
         )
+
     @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk=None):
         """Подписка/отписка на автора"""
@@ -58,7 +59,18 @@ class UserViewSet(viewsets.ModelViewSet):
                     status=400
                 )
             Follow.objects.create(user=user, author=author)
-            return Response(status=201)
+        
+            recipes_limit = request.query_params.get('recipes_limit')
+            try:
+                recipes_limit = int(recipes_limit)
+            except (TypeError, ValueError):
+                recipes_limit = None
+
+            serializer = SubscriptionSerializer(
+                author,
+                context={'request': request, 'recipes_limit': recipes_limit}
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == 'DELETE':
             follow = Follow.objects.filter(user=user, author=author).first()
@@ -76,12 +88,8 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         subscribed_authors = User.objects.filter(following__user=user)
         page = self.paginate_queryset(subscribed_authors)
-        if page is not None:
-            serializer = UserLIstSerializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        
-        serializer = UserLIstSerializer(subscribed_authors, many=True, context={'request': request})
-        return Response(serializer.data)
+        serializer = SubscriptionSerializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
 
 class UserListView(APIView):

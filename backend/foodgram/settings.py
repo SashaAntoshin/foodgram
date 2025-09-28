@@ -126,15 +126,6 @@ REST_FRAMEWORK = {
 }
 
 
-# DJOSER = {
-#     'LOGIN_FIELD': 'email',
-#     'USER_CREATE_PASSWORD_RETYPE': True,
-#     'SERIALIZERS': {
-#         'user_create': 'users.serializers.DjoserUserCreateSerializer',
-#         'user': 'users.serializers.DjoserUserSerializer',
-#         'current_user': 'users.serializers.DjoserUserSerializer'
-#     }
-# }
 
 AUTH_PASSWORD_VALIDATORS = []
 

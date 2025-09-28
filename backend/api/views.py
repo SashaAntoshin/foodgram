@@ -1,6 +1,5 @@
 from rest_framework import viewsets, status, generics, filters
 from rest_framework.decorators import action
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from recipes.models import Recipe, Ingredient, Tag, Favorites, ShoppingBasket
@@ -10,7 +9,7 @@ from api.serializers import (
     TagSerializer,
     FavoritesSerializer, RecipeReadSerializer, RecipeWriteSerializer
 )
-from .permissions import IsAdminOrReadOnly, IsAuthorOrIsAdmin, IsAuthorOrReadOnly
+from .permissions import IsAuthorOrIsAdmin, IsAuthorOrReadOnly
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -66,9 +65,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         recipe_url = request.build_absolute_uri(f'/recipes/{recipe.id}/')
         
-        return Response({
-            'link': recipe_url
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {"short-link": recipe_url},
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=True, methods=('post', 'delete'), permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
@@ -127,17 +127,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        """
-        Скачивание списка покупок
-        URL: /api/recipes/download_shopping_cart/
-        """
+        """Скачать список покупок"""
         user = request.user
-        
-        # Получаем рецепты из корзины пользователя
         shopping_cart_items = ShoppingBasket.objects.filter(user=user)
         recipes = [item.recipe for item in shopping_cart_items]
-        
-        # Формируем список ингредиентов
         ingredients_dict = {}
         
         for recipe in recipes:
@@ -151,14 +144,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 else:
                     ingredients_dict[key] = amount
         
-        # Создаем текстовый файл
         shopping_list = "Список покупок:\n\n"
         for (name, unit), amount in ingredients_dict.items():
             shopping_list += f"• {name} - {amount} {unit}\n"
         
         shopping_list += f"\nВсего ингредиентов: {len(ingredients_dict)}"
-        
-        # Возвращаем текстовый файл
+
         from django.http import HttpResponse
         response = HttpResponse(shopping_list, content_type='text/plain; charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
