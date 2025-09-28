@@ -1,10 +1,9 @@
-from rest_framework import filters, generics, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.serializers import (
-    FavoritesSerializer,
     IngredientSerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
@@ -178,18 +177,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'attachment; filename="shopping_list.txt"'
         )
         return response
-
-
-class FavoriteListView(generics.ListAPIView):
-    """Список избранного"""
-
-    serializer_class = FavoritesSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        return Favorites.objects.select_related(
-            "recipe", "recipe__author"
-        ).filter(user=self.request.user)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):

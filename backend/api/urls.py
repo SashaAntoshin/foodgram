@@ -11,6 +11,7 @@ from users.views import (
     UserAvatarView,
     UserListView,
     UserViewSet,
+	FavoriteListView
 )
 
 from . import views
@@ -29,7 +30,7 @@ urlpatterns = [
     path("users/me/avatar/", UserAvatarView.as_view(), name="user-avatar"),
     path("users/set_password/", ChangePassword.as_view(), name="set-password"),
     path("", include(router.urls)),
-    path("favorites/", views.FavoriteListView.as_view(), name="favorite-list"),
+    path("favorites/", FavoriteListView.as_view(), name="favorite-list"),
     path("api/auth/token/logout/", LogoutView.as_view(), name="logout"),
     path("api/users-list/", UserListView.as_view()),
 ]
