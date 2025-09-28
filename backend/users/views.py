@@ -6,15 +6,14 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from .serializers import (UserSerializer,
+                          UserLIstSerializer,
+                          UserRegistrationSerializer,
+                          FollowSerializer,
+                          SubscriptionSerializer,
+                          AvatarUpdateSerializer
+                          )
 
-from api.serializers import (
-    AvatarUpdateSerializer,
-    FollowSerializer,
-    SubscriptionSerializer,
-    UserLIstSerializer,
-    UserRegistrationSerializer,
-    UserSerializer,
-)
 from users.utils import send_mail
 
 from .models import Follow, User
