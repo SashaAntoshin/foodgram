@@ -1,4 +1,5 @@
 """Кастомные права для разных пользователей"""
+
 from rest_framework import permissions
 
 
@@ -25,7 +26,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class IsAuthorOrIsAdmin(permissions.BasePermission):
     """Права для автора и админа"""
-    
+
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -35,7 +36,7 @@ class IsAuthorOrIsAdmin(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         return obj.author == request.user or request.user.is_admin
-    
+
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
