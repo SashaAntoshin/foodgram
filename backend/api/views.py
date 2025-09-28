@@ -8,6 +8,7 @@ from api.serializers import (
     RecipeReadSerializer,
     RecipeWriteSerializer,
     TagSerializer,
+    RecipeShortSerializer
 )
 from recipes.models import Favorites, Ingredient, Recipe, ShoppingBasket, Tag
 
@@ -35,6 +36,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
         tags = self.request.query_params.getlist("tags")
         if tags:
             queryset = queryset.filter(tags__slug__in=tags).distinct()
+
+        """Избранного"""
+        is_favorited = self.request.query_params.get("is_favorited")
+        if is_favorited == "1" and self.request.user.is_authenticated:
+            favorite_recipe_ids = Favorites.objects.filter(
+                user=self.request.user
+            ).values_list('recipe_id', flat=True)
+            queryset = queryset.filter(id__in=favorite_recipe_ids)
+
+        """Корзины"""
+        is_in_shopping_cart = self.request.query_params.get(
+            "is_in_shopping_cart")
+        if is_in_shopping_cart == "1" and self.request.user.is_authenticated:
+            cart_recipe_ids = ShoppingBasket.objects.filter(
+                user=self.request.user
+            ).values_list('recipe_id', flat=True)
+            queryset = queryset.filter(id__in=cart_recipe_ids)
         return queryset
 
     def perform_create(self, serializer):
@@ -89,10 +107,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             Favorites.objects.create(user=user, recipe=recipe)
-            return Response(
-                {"detail": "Добавлено в избранное"},
-                status=status.HTTP_201_CREATED,
+            serializer = RecipeShortSerializer(
+                recipe, context={"request": request}
             )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         favor = Favorites.objects.filter(user=user, recipe=recipe).first()
         if not favor:
@@ -122,21 +140,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             ShoppingBasket.objects.create(user=user, recipe=recipe)
-            return Response(
-                {"detail": "Добавлено в корзину"},
-                status=status.HTTP_201_CREATED,
+            serializer = RecipeShortSerializer(
+                recipe, context={"request": request}
             )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == "DELETE":
             """Удвление из корзины"""
             recipe_item = ShoppingBasket.objects.filter(
                 user=user, recipe=recipe
             ).first()
             if not recipe_item:
-                if not recipe_item:
-                    return Response(
-                        {"detail": "Рецепт не найден в корзине"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+                return Response(
+                    {"detail": "Рецепт не найден в корзине"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             recipe_item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

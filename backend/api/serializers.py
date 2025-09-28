@@ -82,6 +82,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
+        """Проверка избранного"""
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return Favorites.objects.filter(user=request.user, recipe=obj).exists()
@@ -315,9 +316,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         recipes = obj.recipes.all()
         request = self.context.get("request")
-        recipes_limit = self.context.get("recipes_limit")
-        if recipes_limit:
-            recipes = recipes[:recipes_limit]
+        recipes_limit = request.query_params.get("recipes_limit") if request else None
+        if recipes_limit and recipes_limit.isdigit():
+           recipes_limit_int = int(recipes_limit)
+           recipes = recipes[:recipes_limit_int]
         return [
             {
                 "id": recipe.id,
