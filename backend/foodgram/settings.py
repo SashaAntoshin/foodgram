@@ -73,9 +73,13 @@ WSGI_APPLICATION = "foodgram.wsgi.application"
 
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
 
@@ -130,6 +134,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 STATIC_URL = "static/"
+
+STATIC_ROOT = BASE_DIR / 'collected_static'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
