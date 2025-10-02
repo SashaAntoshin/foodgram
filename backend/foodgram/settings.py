@@ -9,12 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
 SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "django-insecure-4zak3ja^%d9*4o6y_8i&ga4id3wjlgkbm-5q06bw_chx86d02h"
+    "SECRET_KEY", "django-insecure-4zak3ja^%d9*4o6y_8i&ga4id3wjlgkbm-5q06bw_chx86d02h"
 )
 
 
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = ["localhost", "89.169.171.59", "127.0.0.1", "foodisgood.duckdns.org"]
 
@@ -28,13 +27,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'corsheaders',
+    "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
     "users",
     "recipes",
-	'api'
+    "api",
 ]
 
 MIDDLEWARE = [
@@ -50,7 +49,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-	"http://127.0.0.1:3000",
+    "http://127.0.0.1:3000",
     "http://frontend:3000",
 ]
 
@@ -77,13 +76,13 @@ WSGI_APPLICATION = "foodgram.wsgi.application"
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'django'),
-        'USER': os.getenv('POSTGRES_USER', 'django'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', 5432)
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "django"),
+        "USER": os.getenv("POSTGRES_USER", "django"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", 5432),
     }
 }
 
@@ -134,15 +133,15 @@ USE_TZ = True
 
 MEDIA_URL = "/media/"
 
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 STATIC_URL = "static/"
 
-STATIC_ROOT = BASE_DIR / 'collected_static'
+STATIC_ROOT = BASE_DIR / "collected_static"
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 
