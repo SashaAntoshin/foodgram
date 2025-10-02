@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import (
     UserSerializer,
-    UserLIstSerializer,
+    UserListSerializer,
     UserRegistrationSerializer,
 )
 from api.serializers import (
@@ -42,7 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return UserRegistrationSerializer
-        return UserLIstSerializer
+        return UserListSerializer
 
     def perform_create(self, serializer):
         """Пользователь и код подтверждения"""
