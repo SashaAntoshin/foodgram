@@ -15,7 +15,7 @@ services:
     image: sashaantoshin/foodgram_backend:latest
     env_file: .env
     volumes:
-      - static_volume:/app/backend_static
+      - static_volume:/app/collected_static
       - media_volume:/app/media
     depends_on:
       - db
