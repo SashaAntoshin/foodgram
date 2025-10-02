@@ -188,7 +188,7 @@ class LogoutView(APIView):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        except Exception as e:
+        except Exception:
             return Response(
                 {"error": "Ошибка входа"}, status=status.HTTP_400_BAD_REQUEST
             )
