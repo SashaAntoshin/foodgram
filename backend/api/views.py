@@ -70,7 +70,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         self.instance = serializer.save()
 
     def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
         recipe = self.get_object()
         return Response(
             {"link": f"http://{request.get_host()}/recipes/{recipe.id}/"},

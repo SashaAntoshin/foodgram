@@ -11,8 +11,7 @@ from recipes.models import (
     ShoppingBasket,
     Tag,
 )
-from users.models import Follow, User
-from drf_extra_fields.fields import Base64ImageField
+from users.models import Follow
 import base64
 from django.core.files.base import ContentFile
 
@@ -111,7 +110,7 @@ class Base64ImageField(serializers.ImageField):
                 file_name = f"recipe_image.{ext}"
                 data = ContentFile(decoded_file, name=file_name)
 
-            except Exception as e:
+            except Exception:
                 raise serializers.ValidationError(
                     "Некорректный формат изображения"
                 )

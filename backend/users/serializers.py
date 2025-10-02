@@ -1,17 +1,16 @@
-from django.contrib.auth import get_user_model
-from users.models import Follow, User
-from rest_framework import serializers
 import re
 
-"""Сериализаторы для пользователей"""
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
-from users.models import Follow, User
+"""Сериализаторы для пользователей"""
 
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели юзера"""
+    """Сериализатор для модели пользователя"""
 
     password = serializers.CharField(write_only=True, required=True)
 
@@ -58,7 +57,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     """Регистрация, валидация username и email"""
 
     password = serializers.CharField(
-        write_only=True, required=True, style={"input_type": "password"}
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
     )
 
     class Meta:
@@ -97,38 +98,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        """Создание пользователя с хэшированием пароля"""
-        user = User(
-            email=validated_data["email"],
-            username=validated_data["username"],
-            first_name=validated_data.get("first_name", ""),
-            last_name=validated_data.get("last_name", ""),
-        )
-        user.set_password(validated_data["password"])
-        user.save()
-        return user
-
-    def validate_email(self, value):
-        """Валидация email"""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                "Пользователь с таким email уже существует"
-            )
-        return value
-
-    def create(self, validated_data):
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
         user.save()
-        from rest_framework.authtoken.models import Token
-
         Token.objects.get_or_create(user=user)
         return user
 
 
-class UserLIstSerializer(serializers.ModelSerializer):
-    """Сериализатор информации пользователя"""
+class UserListSerializer(serializers.ModelSerializer):
+    """Сериализатор информации о пользователе"""
 
     is_subscribed = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
@@ -163,6 +142,7 @@ class UserLIstSerializer(serializers.ModelSerializer):
 
         if recipes_limit and recipes_limit.isdigit():
             recipes = recipes[: int(recipes_limit)]
+
         from api.serializers import RecipeShortSerializer
 
         return RecipeShortSerializer(
@@ -170,7 +150,7 @@ class UserLIstSerializer(serializers.ModelSerializer):
         ).data
 
     def get_avatar(self, obj):
-        """Вернем ссылку на аватар, если он есть"""
+        """Вернём ссылку на аватар, если он есть"""
         if obj.avatar:
             request = self.context.get("request")
             if request:
