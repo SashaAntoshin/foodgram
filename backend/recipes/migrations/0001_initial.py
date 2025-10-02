@@ -35,7 +35,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "measurement_unit",
-                    models.CharField(max_length=150, verbose_name="Единица измерения"),
+                    models.CharField(
+                        max_length=150, verbose_name="Единица измерения"
+                    ),
                 ),
             ],
             options={
@@ -57,7 +59,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(max_length=150, unique=True, verbose_name="Тег"),
+                    models.CharField(
+                        max_length=150, unique=True, verbose_name="Тег"
+                    ),
                 ),
                 (
                     "slug",
@@ -88,7 +92,9 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     models.PositiveSmallIntegerField(
-                        validators=[django.core.validators.MinValueValidator(1)],
+                        validators=[
+                            django.core.validators.MinValueValidator(1)
+                        ],
                         verbose_name="Количество",
                     ),
                 ),
@@ -121,7 +127,9 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=150)),
                 (
                     "image",
-                    models.ImageField(upload_to="recipes/images", verbose_name="Фото"),
+                    models.ImageField(
+                        upload_to="recipes/images", verbose_name="Фото"
+                    ),
                 ),
                 (
                     "description",
@@ -131,7 +139,9 @@ class Migration(migrations.Migration):
                     "cooking_time",
                     models.PositiveSmallIntegerField(
                         help_text="Время в минутах",
-                        validators=[django.core.validators.MinValueValidator(1)],
+                        validators=[
+                            django.core.validators.MinValueValidator(1)
+                        ],
                         verbose_name="Время приготовления",
                     ),
                 ),

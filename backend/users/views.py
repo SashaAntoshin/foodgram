@@ -66,7 +66,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if request.method == "POST":
             if user == author:
-                return Response({"detail": "Нельзя подписаться на себя"}, status=400)
+                return Response(
+                    {"detail": "Нельзя подписаться на себя"}, status=400
+                )
             if Follow.objects.filter(user=user, author=author).exists():
                 return Response({"detail": "Вы уже подписаны"}, status=400)
             Follow.objects.create(user=user, author=author)
@@ -90,7 +92,9 @@ class UserViewSet(viewsets.ModelViewSet):
             follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    @action(
+        detail=False, methods=["get"], permission_classes=[IsAuthenticated]
+    )
     def subscriptions(self, request):
         """Список моих подписок"""
         user = request.user
@@ -119,7 +123,9 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserLIstSerializer(request.user, context={"request": request})
+        serializer = UserLIstSerializer(
+            request.user, context={"request": request}
+        )
         return Response(serializer.data)
 
 
@@ -226,7 +232,9 @@ class FollowViewSet(viewsets.ModelViewSet):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == "DELETE":
-            follow = get_object_or_404(Follow, user=request.user, author=author)
+            follow = get_object_or_404(
+                Follow, user=request.user, author=author
+            )
             follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -238,6 +246,6 @@ class FavoriteListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Favorites.objects.select_related("recipe", "recipe__author").filter(
-            user=self.request.user
-        )
+        return Favorites.objects.select_related(
+            "recipe", "recipe__author"
+        ).filter(user=self.request.user)

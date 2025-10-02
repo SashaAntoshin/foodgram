@@ -165,7 +165,9 @@ class UserLIstSerializer(serializers.ModelSerializer):
             recipes = recipes[: int(recipes_limit)]
         from api.serializers import RecipeShortSerializer
 
-        return RecipeShortSerializer(recipes, many=True, context=self.context).data
+        return RecipeShortSerializer(
+            recipes, many=True, context=self.context
+        ).data
 
     def get_avatar(self, obj):
         """Вернем ссылку на аватар, если он есть"""

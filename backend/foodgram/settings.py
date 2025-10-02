@@ -9,13 +9,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
 SECRET_KEY = os.getenv(
-    "SECRET_KEY", "django-insecure-4zak3ja^%d9*4o6y_8i&ga4id3wjlgkbm-5q06bw_chx86d02h"
+    "SECRET_KEY",
+    "django-insecure-4zak3ja^%d9*4o6y_8i&ga4id3wjlgkbm-5q06bw_chx86d02h",
 )
 
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ["localhost", "89.169.171.59", "127.0.0.1", "foodisgood.duckdns.org"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "89.169.171.59",
+    "127.0.0.1",
+    "foodisgood.duckdns.org",
+]
 
 AUTH_USER_MODEL = "users.User"
 

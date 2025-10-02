@@ -31,7 +31,9 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     """Модель ингридиента"""
 
-    name = models.CharField(max_length=MAX_LENGTH, verbose_name="Название ингридиента")
+    name = models.CharField(
+        max_length=MAX_LENGTH, verbose_name="Название ингридиента"
+    )
     measurement_unit = models.CharField(
         max_length=MAX_LENGTH, verbose_name="Единица измерения"
     )
@@ -83,7 +85,9 @@ class Recipe(models.Model):
     name = models.CharField(max_length=MAX_LENGTH, blank=False)
     image = models.ImageField(upload_to="recipes/images", verbose_name="Фото")
     text = models.TextField(verbose_name="Оисание рецепта")
-    tags = models.ManyToManyField(Tag, related_name="recipes", verbose_name="Теги")
+    tags = models.ManyToManyField(
+        Tag, related_name="recipes", verbose_name="Теги"
+    )
     ingredients = models.ManyToManyField(
         Ingredient,
         through="IngredientsInRecipe",
@@ -95,7 +99,9 @@ class Recipe(models.Model):
         verbose_name="Время приготовления",
         help_text="Время в минутах",
     )
-    pub_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата публикации")
+    pub_date = models.DateTimeField(
+        auto_now_add=True, verbose_name="Дата публикации"
+    )
 
     class Meta:
         ordering = ["-pub_date"]
@@ -121,7 +127,9 @@ class Favorites(models.Model):
         related_name="saved",
         verbose_name="Избранные блюда",
     )
-    added_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата добавления")
+    added_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Дата добавления"
+    )
 
     class Meta:
         ordering = ["-added_at"]
@@ -129,7 +137,9 @@ class Favorites(models.Model):
         verbose_name_plural = "Избранные рецепты"
 
         constraints = [
-            models.UniqueConstraint(fields=["user", "recipe"], name="unique_favorite")
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_favorite"
+            )
         ]
 
     def __str__(self):
@@ -149,7 +159,9 @@ class ShoppingBasket(models.Model):
         related_name="in_shopping_basket",
         verbose_name="Рецепт",
     )
-    added_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата добавления")
+    added_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Дата добавления"
+    )
 
     class Meta:
         ordering = ["-added_at"]
