@@ -1,0 +1,47 @@
+volumes:
+  pg_data:
+  static_volume:
+  media_volume:
+
+
+services:
+  db:
+    image: postgres:14.10
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  backend:
+    image: sashaantoshin/foodgram_backend:latest
+    env_file: .env
+    volumes:
+      - static_volume:/app/backend_static
+      - media_volume:/app/media
+    depends_on:
+      - db
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 foodgram.wsgi:application"
+
+  frontend:
+    image: sashaantoshin/foodgram_frontend:latest
+    env_file: .env
+    depends_on:
+      - backend
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static_volume:/frontend_static
+
+  gateway:
+    image: sashaantoshin/foodgram_gateway:latest
+    env_file: .env
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - backend
+      - frontend
+    restart: always
