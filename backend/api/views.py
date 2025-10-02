@@ -8,7 +8,7 @@ from api.serializers import (
     RecipeReadSerializer,
     RecipeWriteSerializer,
     TagSerializer,
-    RecipeShortSerializer
+    RecipeShortSerializer,
 )
 from recipes.models import Favorites, Ingredient, Recipe, ShoppingBasket, Tag
 
@@ -42,16 +42,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if is_favorited == "1" and self.request.user.is_authenticated:
             favorite_recipe_ids = Favorites.objects.filter(
                 user=self.request.user
-            ).values_list('recipe_id', flat=True)
+            ).values_list("recipe_id", flat=True)
             queryset = queryset.filter(id__in=favorite_recipe_ids)
 
         """Корзины"""
-        is_in_shopping_cart = self.request.query_params.get(
-            "is_in_shopping_cart")
+        is_in_shopping_cart = self.request.query_params.get("is_in_shopping_cart")
         if is_in_shopping_cart == "1" and self.request.user.is_authenticated:
             cart_recipe_ids = ShoppingBasket.objects.filter(
                 user=self.request.user
-            ).values_list('recipe_id', flat=True)
+            ).values_list("recipe_id", flat=True)
             queryset = queryset.filter(id__in=cart_recipe_ids)
         return queryset
 
@@ -107,9 +106,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             Favorites.objects.create(user=user, recipe=recipe)
-            serializer = RecipeShortSerializer(
-                recipe, context={"request": request}
-            )
+            serializer = RecipeShortSerializer(recipe, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         favor = Favorites.objects.filter(user=user, recipe=recipe).first()
@@ -132,17 +129,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         user = request.user
         if request.method == "POST":
-            if ShoppingBasket.objects.filter(
-                user=user, recipe=recipe
-            ).exists():
+            if ShoppingBasket.objects.filter(user=user, recipe=recipe).exists():
                 return Response(
                     {"detail": "Рецепт уже в корзине"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             ShoppingBasket.objects.create(user=user, recipe=recipe)
-            serializer = RecipeShortSerializer(
-                recipe, context={"request": request}
-            )
+            serializer = RecipeShortSerializer(recipe, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == "DELETE":
             """Удвление из корзины"""
@@ -158,9 +151,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe_item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(
-        detail=False, methods=["get"], permission_classes=[IsAuthenticated]
-    )
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         """Скачать список покупок"""
         user = request.user
@@ -187,12 +178,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         from django.http import HttpResponse
 
-        response = HttpResponse(
-            shopping_list, content_type="text/plain; charset=utf-8"
-        )
-        response["Content-Disposition"] = (
-            'attachment; filename="shopping_list.txt"'
-        )
+        response = HttpResponse(shopping_list, content_type="text/plain; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
         return response
 
 

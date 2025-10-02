@@ -63,17 +63,13 @@ class Follow(models.Model):
         related_name="following",
         verbose_name="автор",
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="дата подписки"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="дата подписки")
 
     class Meta:
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
         constraints = [
-            models.UniqueConstraint(
-                fields=["user", "author"], name="unique_follow"
-            )
+            models.UniqueConstraint(fields=["user", "author"], name="unique_follow")
         ]
 
     def __str__(self):

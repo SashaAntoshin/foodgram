@@ -11,7 +11,7 @@ from users.views import (
     UserAvatarView,
     UserListView,
     UserViewSet,
-	FavoriteListView
+    FavoriteListView,
 )
 
 from . import views
