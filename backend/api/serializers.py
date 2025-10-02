@@ -1,4 +1,4 @@
-from users.serializers import UserLIstSerializer
+from users.serializers import UserListSerializer
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -56,7 +56,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
-    author = UserLIstSerializer(read_only=True)
+    author = UserListSerializer(read_only=True)
     ingredients = IngredientInRecipeSerializer(
         source="ingredients_amounts", many=True, read_only=True
     )
