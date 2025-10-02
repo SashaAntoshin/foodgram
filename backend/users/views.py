@@ -113,7 +113,7 @@ class UserListView(APIView):
 
     def get(self, request):
         users = User.objects.all()
-        serializer = UserLIstSerializer(users, many=True)
+        serializer = UserListSerializer(users, many=True)
         return Response(serializer.data)
 
 
@@ -123,7 +123,7 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserLIstSerializer(
+        serializer = UserListSerializer(
             request.user, context={"request": request}
         )
         return Response(serializer.data)
