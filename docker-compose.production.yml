@@ -21,9 +21,8 @@ services:
       - db
     command: >
       sh -c "python manage.py migrate &&
-           python manage.py collectstatic --noinput &&
-           cp -r /app/collected_static/. /app/backend_static/ &&  # ← ДОБАВЬ КОПИРОВАНИЕ
-           gunicorn --bind 0.0.0.0:8000 foodgram.wsgi:application"
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 foodgram.wsgi:application"
 
   frontend:
     image: sashaantoshin/foodgram_frontend:latest
