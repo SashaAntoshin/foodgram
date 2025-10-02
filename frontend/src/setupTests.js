@@ -3,11 +3,16 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
 
-if (typeof global.setImmediate === "undefined") {
-	global.setImmediate = (fn, ...args) => setTimeout(fn, 0, ...args);
-  }
-  
-if (typeof global.clearImmediate === "undefined") {
-    global.clearImmediate = (id) => clearTimeout(id);
-  }
+test('renders learn react link', () => {
+  render(
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  );
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
