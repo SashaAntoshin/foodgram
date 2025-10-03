@@ -3,7 +3,7 @@ import base64
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from recipes.models import (
-    Favorites,
+    Favorite,
     Ingredient,
     IngredientsInRecipe,
     Recipe,
@@ -18,7 +18,7 @@ User = get_user_model()
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
-    """Вспомогательный сериализатор пецептов"""
+    """Вспомогательный сериализатор пецептов."""
 
     class Meta:
         model = Recipe
@@ -26,7 +26,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Тег"""
+    """Сериализатор модели Тег."""
 
     class Meta:
         model = Tag
@@ -34,7 +34,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Ингридиент"""
+    """Сериализатор модели Ингридиент."""
 
     class Meta:
         model = Ingredient
@@ -78,16 +78,16 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
-        """Проверка избранного"""
+        """Проверка избранного."""
         request = self.context.get("request")
         if request and request.user.is_authenticated:
-            return Favorites.objects.filter(
+            return Favorite.objects.filter(
                 user=request.user, recipe=obj
             ).exists()
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        """Проверка наличия рецепта в корзине"""
+        """Проверка наличия рецепта в корзине."""
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return ShoppingBasket.objects.filter(
@@ -97,7 +97,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class Base64ImageField(serializers.ImageField):
-    """Конвертация картинки для сериализатора рецептов"""
+    """Конвертация картинки для сериализатора рецептов."""
 
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
@@ -237,10 +237,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
 
 class FavoritesSerializer(serializers.ModelSerializer):
-    """Сериализатор для Избранного"""
+    """Сериализатор для Избранного."""
 
     class Meta:
-        model = Favorites
+        model = Favorite
         fields = ("user", "recipe", "added_at")
         read_only_fields = ("user", "added_at")
 
@@ -251,7 +251,7 @@ class FavoritesSerializer(serializers.ModelSerializer):
 
 
 class ShopingBasketSerializer(serializers.ModelSerializer):
-    """Сериализатор для корзины"""
+    """Сериализатор для корзины."""
 
     class Meta:
         model = ShoppingBasket
@@ -267,7 +267,7 @@ class AvatarUpdateSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Подписок"""
+    """Сериализатор модели Подписок."""
 
     user = serializers.SlugRelatedField(
         slug_field="username",
@@ -284,7 +284,7 @@ class FollowSerializer(serializers.ModelSerializer):
         read_only_fields = ("user", "created_at")
 
     def validate_author(self, value):
-        """Проверка подписок"""
+        """Проверка подписок."""
         user = self.context["request"].user
         if value == user:
             raise serializers.ValidationError(

@@ -6,7 +6,7 @@ from api.serializers import (
 )
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from recipes.models import Favorites
+from recipes.models import Favorite
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
@@ -31,7 +31,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = CustomPagination
-    """Доп. логика для создания пользователя"""
+    """Доп. логика для создания пользователя."""
 
     def get_permissions(self):
         if self.action in ["create", "list", "retrieve"]:
@@ -44,7 +44,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserListSerializer
 
     def perform_create(self, serializer):
-        """Пользователь и код подтверждения"""
+        """Пользователь и код подтверждения."""
         user = serializer.save()
         send_mail(
             subject="Добро пожаловать!",
@@ -59,7 +59,7 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request, pk=None):
-        """Подписка/отписка на автора"""
+        """Подписка/отписка на автора."""
         author = self.get_object()
         user = request.user
 
@@ -95,7 +95,7 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=False, methods=["get"], permission_classes=[IsAuthenticated]
     )
     def subscriptions(self, request):
-        """Список моих подписок"""
+        """Список моих подписок."""
         user = request.user
         subscribed_authors = User.objects.filter(following__user=user)
         page = self.paginate_queryset(subscribed_authors)
@@ -106,7 +106,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class UserListView(APIView):
-    """Отдельный вью только для списка пользователей"""
+    """Отдельный вью только для списка пользователей."""
 
     permission_classes = [permissions.AllowAny]
 
@@ -117,7 +117,7 @@ class UserListView(APIView):
 
 
 class MeView(APIView):
-    """Вью для user/me"""
+    """Вью для user/me."""
 
     permission_classes = [IsAuthenticated]
 
@@ -129,20 +129,20 @@ class MeView(APIView):
 
 
 class UserAvatarView(APIView):
-    """Вью для аватара"""
+    """Вью для аватара."""
 
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
 
     def put(self, request):
-        """Обновление"""
+        """Обновление."""
         serializer = AvatarUpdateSerializer(request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
     def delete(self, request):
-        """Удаление"""
+        """Удаление."""
         user = request.user
         if user.avatar:
             user.avatar.delete(save=True)
@@ -150,7 +150,7 @@ class UserAvatarView(APIView):
 
 
 class ChangePassword(APIView):
-    """Смена пароля"""
+    """Смена пароля."""
 
     permission_classes = [IsAuthenticated]
 
@@ -171,12 +171,12 @@ class ChangePassword(APIView):
 
 
 class LogoutView(APIView):
-    """Вью для выхода и удаления токена"""
+    """Вью для выхода и удаления токена."""
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        """Удаление токена"""
+        """Удаление токена."""
         try:
             if request.auth:
                 request.auth.delete()
@@ -194,7 +194,7 @@ class LogoutView(APIView):
 
 
 class FollowViewSet(viewsets.ModelViewSet):
-    """Вьюсет модели подписок"""
+    """Вьюсет модели подписок."""
 
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -214,14 +214,14 @@ class FollowViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def subscriptions(self, request):
-        """Подписки пользователя"""
+        """Подписки пользователя."""
         follows = self.get_queryset()
         serializer = self.get_serializer(follows, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=["post", "delete"])
     def subscribe(self, request, pk=None):
-        """Подписаться / Отписаться"""
+        """Подписаться / Отписаться."""
         User = get_user_model()
         author = get_object_or_404(User, pk=pk)
 
@@ -239,12 +239,12 @@ class FollowViewSet(viewsets.ModelViewSet):
 
 
 class FavoriteListView(generics.ListAPIView):
-    """Список избранного"""
+    """Список избранного."""
 
     serializer_class = RecipeReadSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Favorites.objects.select_related(
+        return Favorite.objects.select_related(
             "recipe", "recipe__author"
         ).filter(user=self.request.user)

@@ -1,4 +1,4 @@
-"""Кастомные права для разных пользователей"""
+"""Кастомные права для разных пользователей."""
 
 from rest_framework import permissions
 
@@ -16,7 +16,7 @@ class IsAdmin(permissions.BasePermission):
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    """Права на создание и редактирование только для админа"""
+    """Права на создание и редактирование только для админа."""
 
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -25,7 +25,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 
 class IsAuthorOrIsAdmin(permissions.BasePermission):
-    """Права для автора и админа"""
+    """Права для автора и админа."""
 
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:

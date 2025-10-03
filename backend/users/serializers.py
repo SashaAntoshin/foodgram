@@ -4,13 +4,13 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-"""Сериализаторы для пользователей"""
+"""Сериализаторы для пользователей."""
 
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели пользователя"""
+    """Сериализатор для модели пользователя."""
 
     password = serializers.CharField(write_only=True, required=True)
 
@@ -54,7 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """Регистрация, валидация username и email"""
+    """Регистрация, валидация username и email."""
 
     password = serializers.CharField(
         write_only=True,
@@ -107,7 +107,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
-    """Сериализатор информации о пользователе"""
+    """Сериализатор информации о пользователе."""
 
     is_subscribed = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
@@ -131,7 +131,7 @@ class UserListSerializer(serializers.ModelSerializer):
         return obj.recipes.count()
 
     def get_recipes(self, obj):
-        """Рецепты пользователя с ограничением через recipes_limit"""
+        """Рецепты пользователя с ограничением через recipes_limit."""
         request = self.context.get("request")
         recipes_limit = None
 
@@ -150,7 +150,7 @@ class UserListSerializer(serializers.ModelSerializer):
         ).data
 
     def get_avatar(self, obj):
-        """Вернём ссылку на аватар, если он есть"""
+        """Вернём ссылку на аватар, если он есть."""
         if obj.avatar:
             request = self.context.get("request")
             if request:

@@ -9,13 +9,11 @@ class User(AbstractUser):
 
     username = models.CharField(
         max_length=MAX_LENGTH,
-        blank=False,
         verbose_name="Имя пользователя",
         help_text="Обязательное поле",
     )
     first_name = models.CharField(
-        max_length=MAX_LENGTH, verbose_name="Имя", blank=False
-    )
+        max_length=MAX_LENGTH, verbose_name="Имя")
     last_name = models.CharField(
         max_length=MAX_LENGTH,
         blank=False,
@@ -24,8 +22,7 @@ class User(AbstractUser):
     )
     bio = models.TextField(blank=True, verbose_name="Об авторе")
     email = models.EmailField(
-        max_length=256, unique=True, help_text="Обязательное поле", blank=False
-    )
+        max_length=256, unique=True, help_text="Обязательное поле")
     avatar = models.ImageField(
         upload_to="users/avatars", blank=True, null=True, verbose_name="аватар"
     )

@@ -8,16 +8,14 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    """Модель тега рецепта"""
+    """Модель тега рецепта."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH, unique=True, verbose_name="Тег", blank=False
-    )
+        max_length=MAX_LENGTH, unique=True, verbose_name="Тег")
     slug = models.SlugField(
         max_length=MAX_LENGTH,
         unique=True,
         verbose_name="Уникальный слаг",
-        blank=False,
     )
 
     class Meta:
@@ -29,7 +27,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    """Модель ингридиента"""
+    """Модель ингридиента."""
 
     name = models.CharField(
         max_length=MAX_LENGTH, verbose_name="Название ингридиента"
@@ -47,7 +45,7 @@ class Ingredient(models.Model):
 
 
 class IngredientsInRecipe(models.Model):
-    """Модель для связи ингридиента и рецепта"""
+    """Модель для связи ингридиента и рецепта."""
 
     recipe = models.ForeignKey(
         "Recipe", on_delete=models.CASCADE, related_name="ingredients_amounts"
@@ -82,7 +80,7 @@ class Recipe(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Автор",
     )
-    name = models.CharField(max_length=MAX_LENGTH, blank=False)
+    name = models.CharField(max_length=MAX_LENGTH)
     image = models.ImageField(upload_to="recipes/images", verbose_name="Фото")
     text = models.TextField(verbose_name="Оисание рецепта")
     tags = models.ManyToManyField(
@@ -112,8 +110,8 @@ class Recipe(models.Model):
         return self.name
 
 
-class Favorites(models.Model):
-    """Модель избранного"""
+class Favorite(models.Model):
+    """Модель избранного."""
 
     user = models.ForeignKey(
         User,

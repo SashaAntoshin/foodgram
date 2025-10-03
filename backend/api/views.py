@@ -9,7 +9,7 @@ from api.serializers import (
 from django.db.models import Sum
 from django.http import HttpResponse
 from recipes.models import (
-    Favorites,
+    Favorite,
     Ingredient,
     IngredientsInRecipe,
     Recipe,
@@ -48,15 +48,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if tags:
             queryset = queryset.filter(tags__slug__in=tags).distinct()
 
-        """Избранного"""
+        """Избранного."""
         is_favorited = self.request.query_params.get("is_favorited")
         if is_favorited == "1" and self.request.user.is_authenticated:
-            favorite_recipe_ids = Favorites.objects.filter(
+            favorite_recipe_ids = Favorite.objects.filter(
                 user=self.request.user
             ).values_list("recipe_id", flat=True)
             queryset = queryset.filter(id__in=favorite_recipe_ids)
 
-        """Корзины"""
+        """Корзины."""
         is_in_shopping_cart = self.request.query_params.get(
             "is_in_shopping_cart"
         )
@@ -95,7 +95,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="get-link")
     def get_link(self, request, pk=None):
-        """Получение ссылки на рецепт"""
+        """Получение ссылки на рецепт."""
         recipe = self.get_object()
         recipe_url = request.build_absolute_uri(f"/recipes/{recipe.id}/")
 
@@ -111,7 +111,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
 
         if request.method == "POST":
-            if Favorites.objects.filter(user=user, recipe=recipe).exists():
+            if Favorite.objects.filter(user=user, recipe=recipe).exists():
                 return Response(
                     {"detail": "Рецепт уже в избранном"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -126,15 +126,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        delte_favor = Favorites.objects.filter(
+        delete_favor = Favorite.objects.filter(
             user=user, recipe=recipe
         ).exists()
-        if not delte_favor:
+        if not delete_favor:
             return Response(
                 {"detail": "Рецет не найден в избранном"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        Favorites.objects.filter(user=user, recipe=recipe).delete()
+        Favorite.objects.filter(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -144,7 +144,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path="shopping_cart",
     )
     def shopping_cart(self, request, pk=None):
-        """Добавление и удаление рецепта в корзину"""
+        """Добавление и удаление рецепта в корзину."""
         recipe = self.get_object()
         user = request.user
 
@@ -163,7 +163,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == "DELETE":
-            """Удаление из корзины"""
+            """Удаление из корзины."""
             cart_exists = ShoppingBasket.objects.filter(
                 user=user, recipe=recipe
             ).exists()
@@ -205,7 +205,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет для Ингридиентов"""
+    """Вьюсет для Ингридиентов."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer

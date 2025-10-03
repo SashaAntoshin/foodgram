@@ -3,7 +3,7 @@
 from django.contrib import admin
 
 from .models import (
-    Favorites,
+    Favorite,
     Ingredient,
     IngredientsInRecipe,
     Recipe,
@@ -44,7 +44,7 @@ class ShoppingBasketAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "recipe__name")
 
 
-@admin.register(Favorites)
+@admin.register(Favorite)
 class FavoritesAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe", "added_at")
     list_filter = ("added_at",)
