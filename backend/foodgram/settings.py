@@ -1,5 +1,4 @@
 import os
-
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -9,13 +8,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
 SECRET_KEY = os.getenv(
-    "SECRET_KEY", "django-insecure-4zak3ja^%d9*4o6y_8i&ga4id3wjlgkbm-5q06bw_chx86d02h"
+    "SECRET_KEY",
+    "django-insecure-4zak3ja^%d9*4o6y_8i&ga4id3wjlgkbm-5q06bw_chx86d02h",
 )
 
 
-DEBUG = True #os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = True  # os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ["localhost", "89.169.171.59", "127.0.0.1", "foodisgood.duckdns.org"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "89.169.171.59",
+    "127.0.0.1",
+    "foodisgood.duckdns.org",
+]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -75,22 +80,22 @@ TEMPLATES = [
 WSGI_APPLICATION = "foodgram.wsgi.application"
 
 
-if os.getenv('DB_HOST'):  # Если есть настройки PostgreSQL
+if os.getenv("DB_HOST"):  # Если есть настройки PostgreSQL
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB', 'foodgram'),
-            'USER': os.getenv('POSTGRES_USER', 'foodgram_user'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', ''),
-            'PORT': os.getenv('DB_PORT', 5432)
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB", "foodgram"),
+            "USER": os.getenv("POSTGRES_USER", "foodgram_user"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+            "HOST": os.getenv("DB_HOST", ""),
+            "PORT": os.getenv("DB_PORT", 5432),
         }
     }
 else:  # Иначе используем SQLite для разработки
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
