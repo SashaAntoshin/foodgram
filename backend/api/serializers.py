@@ -213,7 +213,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags_data)
         self._create_ingredients(recipe, ingredients_data)
-
         return recipe
 
     def update(self, instance, validated_data):
@@ -299,7 +298,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes_count = serializers.IntegerField(
+        read_only=True,
+        default=0
+    )
 
     class Meta:
         model = User
@@ -334,21 +336,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             request.query_params.get("recipes_limit") if request else None
         )
         if recipes_limit and recipes_limit.isdigit():
-            recipes_limit_int = int(recipes_limit)
-            recipes = recipes[:recipes_limit_int]
-        return [
-            {
-                "id": recipe.id,
-                "name": recipe.name,
-                "image": (
-                    request.build_absolute_uri(recipe.image.url)
-                    if recipe.image
-                    else None
-                ),
-                "cooking_time": recipe.cooking_time,
-            }
-            for recipe in recipes
-        ]
+            recipes = recipes[:int(recipes_limit)]
+        from api.serializers import RecipeShortSerializer
+        return RecipeShortSerializer(
+            recipes, many=True, context=self.context
+        ).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
