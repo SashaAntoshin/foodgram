@@ -15,12 +15,12 @@ SECRET_KEY = os.getenv(
 
 DEBUG = True  # os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "89.169.171.59",
-    "127.0.0.1",
-    "foodisgood.duckdns.org",
-]
+ALLOWED_HOSTS = os.getenv(
+    'ALLOWED_HOSTS', 
+    'localhost,127.0.0.1,backend'
+).split(',')
+
+
 
 AUTH_USER_MODEL = "users.User"
 
@@ -52,11 +52,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://frontend:3000",
-]
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS',
+    'https://foodisgood.duckdns.org,http://foodisgood.duckdns.org,http://localhost:3000,http://127.0.0.1:3000'
+).split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 
