@@ -66,22 +66,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         return Response(read_serializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_update(self, serializer):
-        self.instance = serializer.save()
-
-    def update(self, request, *args, **kwargs):
-        recipe = self.get_object()
-        return Response(
-            {"link": f"http://{request.get_host()}/recipes/{recipe.id}/"},
-            status=status.HTTP_200_OK,
-        )
-
     def partial_update(self, request, *args, **kwargs):
-        super().partial_update(request, *args, **kwargs)
-        read_serializer = RecipeReadSerializer(
-            self.instance, context={"request": self.request}
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        write_serializer = RecipeWriteSerializer(
+            instance, data=request.data, partial=partial, context={
+                'request': request}
         )
-        return Response(read_serializer.data, status=status.HTTP_200_OK)
+        write_serializer.is_valid(raise_exception=True)
+        self.perform_update(write_serializer)
+        read_serializer = RecipeReadSerializer(
+            instance, context={'request': request})
+        return Response(read_serializer.data)
 
     @action(detail=True, methods=["get"], url_path="get-link")
     def get_link(self, request, pk=None):
