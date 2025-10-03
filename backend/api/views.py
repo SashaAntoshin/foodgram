@@ -9,6 +9,7 @@ from api.serializers import (
     RecipeWriteSerializer,
     TagSerializer,
     RecipeShortSerializer,
+    FavoritesSerializer
 )
 from recipes.models import Favorites, Ingredient, Recipe, ShoppingBasket, Tag
 
@@ -105,19 +106,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     {"detail": "Рецепт уже в избранном"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            Favorites.objects.create(user=user, recipe=recipe)
-            serializer = RecipeShortSerializer(
-                recipe, context={"request": request}
+            favorite_serializer = FavoritesSerializer(
+                data={"recipe": recipe.id},
+                context={"request": request}
             )
+            favorite_serializer.is_valid(raise_exception=True)
+            favorite_serializer.save(user=user)
+            serializer = RecipeShortSerializer(recipe,
+                                               context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        favor = Favorites.objects.filter(user=user, recipe=recipe).first()
-        if not favor:
+        
+        favorite = Favorites.objects.filter(user=user, recipe=recipe).first()
+        if not favorite:
             return Response(
                 {"detail": "Рецепт не найден"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        favor.delete()
+        favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(

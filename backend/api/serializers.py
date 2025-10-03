@@ -243,6 +243,12 @@ class FavoritesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorites
         fields = ("user", "recipe", "added_at")
+        read_only_fields = ('user', 'added_at')
+
+    def create(self, validated_data):
+        """Подставляем user из контекста"""
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 class ShopingBasketSerializer(serializers.ModelSerializer):
