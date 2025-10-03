@@ -30,6 +30,8 @@ urlpatterns = [
     path("users/set_password/", ChangePassword.as_view(), name="set-password"),
     path("", include(router.urls)),
     path("favorites/", FavoriteListView.as_view(), name="favorite-list"),
-    path("api/auth/token/logout/", LogoutView.as_view(), name="logout"),
-    path("api/users-list/", UserListView.as_view()),
+    path("auth/token/logout/", LogoutView.as_view(), name="logout"),
+    path("users-list/", UserListView.as_view()),
+    path("auth/", include("djoser.urls")),
+    path("auth/", include("djoser.urls.authtoken")),
 ]
