@@ -20,7 +20,7 @@ router = DefaultRouter()
 
 """Подключение роутеров для вьюсетов"""
 router.register("users", UserViewSet, basename="user")
-router.register("recipes", views.RecipeViewSet)
+router.register("recipes", views.RecipeViewSet, basename='recipes')
 router.register("tags", views.TagViewSet, basename="tag")
 router.register("ingredients", views.IngredientViewSet, basename="ingredients")
 router.register("follow", FollowViewSet, basename="follow")

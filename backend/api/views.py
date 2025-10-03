@@ -17,7 +17,6 @@ from .permissions import IsAuthorOrIsAdmin, IsAuthorOrReadOnly
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
     permission_classes = [IsAuthorOrIsAdmin, IsAuthorOrReadOnly]
     pagination_class = CustomPagination
     filterset_fields = ["author", "tags"]
@@ -28,11 +27,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeWriteSerializer
 
     def get_queryset(self):
-        """Фильтрация по авторам и тегам"""
-        queryset = super().get_queryset()
+        queryset = Recipe.objects.select_related('author').prefetch_related(
+            'tags',
+            'ingredients_amounts__ingredient'
+        )
+
         author_id = self.request.query_params.get("author")
         if author_id:
             queryset = queryset.filter(author_id=author_id)
+
         tags = self.request.query_params.getlist("tags")
         if tags:
             queryset = queryset.filter(tags__slug__in=tags).distinct()
