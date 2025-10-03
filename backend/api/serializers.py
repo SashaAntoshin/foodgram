@@ -1,8 +1,7 @@
-from users.serializers import UserListSerializer
+import base64
 
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-
+from django.core.files.base import ContentFile
 from recipes.models import (
     Favorites,
     Ingredient,
@@ -11,10 +10,9 @@ from recipes.models import (
     ShoppingBasket,
     Tag,
 )
+from rest_framework import serializers
 from users.models import Follow
-import base64
-from django.core.files.base import ContentFile
-
+from users.serializers import UserListSerializer
 
 User = get_user_model()
 
@@ -168,8 +166,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                 )
 
         existing_ids = set(
-            Ingredient.objects.filter(
-                id__in=ingredient_ids).values_list("id", flat=True)
+            Ingredient.objects.filter(id__in=ingredient_ids).values_list(
+                "id", flat=True
+            )
         )
         missing_ids = set(ingredient_ids) - existing_ids
 
@@ -199,7 +198,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             IngredientsInRecipe(
                 recipe=recipe,
                 ingredient_id=ingredient["id"],
-                amount=ingredient["amount"]
+                amount=ingredient["amount"],
             )
             for ingredient in ingredients_data
         ]
@@ -243,11 +242,11 @@ class FavoritesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorites
         fields = ("user", "recipe", "added_at")
-        read_only_fields = ('user', 'added_at')
+        read_only_fields = ("user", "added_at")
 
     def create(self, validated_data):
         """Подставляем user из контекста"""
-        validated_data['user'] = self.context['request'].user
+        validated_data["user"] = self.context["request"].user
         return super().create(validated_data)
 
 
@@ -304,10 +303,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.IntegerField(
-        read_only=True,
-        default=0
-    )
+    recipes_count = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = User
@@ -342,8 +338,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             request.query_params.get("recipes_limit") if request else None
         )
         if recipes_limit and recipes_limit.isdigit():
-            recipes = recipes[:int(recipes_limit)]
+            recipes = recipes[: int(recipes_limit)]
         from api.serializers import RecipeShortSerializer
+
         return RecipeShortSerializer(
             recipes, many=True, context=self.context
         ).data

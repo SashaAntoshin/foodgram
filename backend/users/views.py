@@ -1,28 +1,27 @@
+from api.serializers import (
+    AvatarUpdateSerializer,
+    FollowSerializer,
+    RecipeReadSerializer,
+    SubscriptionSerializer,
+)
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, viewsets, generics
+from recipes.models import Favorites
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import (
-    UserSerializer,
-    UserListSerializer,
-    UserRegistrationSerializer,
-)
-from api.serializers import (
-    FollowSerializer,
-    SubscriptionSerializer,
-    AvatarUpdateSerializer,
-    RecipeReadSerializer,
-)
-
 from users.utils import send_mail
-from recipes.models import Favorites
 
 from .models import Follow, User
 from .paginations import CustomPagination
+from .serializers import (
+    UserListSerializer,
+    UserRegistrationSerializer,
+    UserSerializer,
+)
 
 
 class UserViewSet(viewsets.ModelViewSet):

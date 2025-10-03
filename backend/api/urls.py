@@ -2,16 +2,15 @@
 
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-
 from users.views import (
     ChangePassword,
+    FavoriteListView,
     FollowViewSet,
     LogoutView,
     MeView,
     UserAvatarView,
     UserListView,
     UserViewSet,
-    FavoriteListView,
 )
 
 from . import views
@@ -20,7 +19,7 @@ router = DefaultRouter()
 
 """Подключение роутеров для вьюсетов"""
 router.register("users", UserViewSet, basename="user")
-router.register("recipes", views.RecipeViewSet, basename='recipes')
+router.register("recipes", views.RecipeViewSet, basename="recipes")
 router.register("tags", views.TagViewSet, basename="tag")
 router.register("ingredients", views.IngredientViewSet, basename="ingredients")
 router.register("follow", FollowViewSet, basename="follow")
