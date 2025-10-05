@@ -19,6 +19,11 @@ ALLOWED_HOSTS = os.getenv(
     "ALLOWED_HOSTS", "localhost,127.0.0.1,backend,foodisgood.duckdns.org"
 ).split(",")
 
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS", 
+    "https://foodisgood.duckdns.org,http://foodisgood.duckdns.org"
+).split(",")
+
 AUTH_USER_MODEL = "users.User"
 
 
