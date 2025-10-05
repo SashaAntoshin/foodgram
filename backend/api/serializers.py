@@ -18,7 +18,7 @@ User = get_user_model()
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
-    """Вспомогательный сериализатор пецептов."""
+    """Вспомогательный сериализатор пецептов"""
 
     class Meta:
         model = Recipe
@@ -26,7 +26,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Тег."""
+    """Сериализатор модели Тег"""
 
     class Meta:
         model = Tag
@@ -34,7 +34,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Ингридиент."""
+    """Сериализатор модели Ингридиент"""
 
     class Meta:
         model = Ingredient
@@ -78,7 +78,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
-        """Проверка избранного."""
+        """Проверка избранного"""
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return Favorite.objects.filter(
@@ -87,7 +87,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        """Проверка наличия рецепта в корзине."""
+        """Проверка наличия рецепта в корзине"""
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return ShoppingBasket.objects.filter(
@@ -97,7 +97,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class Base64ImageField(serializers.ImageField):
-    """Конвертация картинки для сериализатора рецептов."""
+    """Конвертация картинки для сериализатора рецептов"""
 
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
@@ -237,7 +237,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
 
 class FavoritesSerializer(serializers.ModelSerializer):
-    """Сериализатор для Избранного."""
+    """Сериализатор для Избранного"""
 
     class Meta:
         model = Favorite
@@ -251,7 +251,7 @@ class FavoritesSerializer(serializers.ModelSerializer):
 
 
 class ShopingBasketSerializer(serializers.ModelSerializer):
-    """Сериализатор для корзины."""
+    """Сериализатор для корзины"""
 
     class Meta:
         model = ShoppingBasket
@@ -267,34 +267,36 @@ class AvatarUpdateSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Подписок."""
+    """Сериализатор модели Подписок"""
 
     user = serializers.SlugRelatedField(
         slug_field="username",
         read_only=True,
     )
     author = serializers.SlugRelatedField(
-        slug_field="username",
+        slug_field="id",
         queryset=User.objects.all(),
     )
 
     class Meta:
         model = Follow
-        fields = ("user", "author", "created_ad")
+        fields = ("user", "author", "created_at")
         read_only_fields = ("user", "created_at")
 
     def validate_author(self, value):
-        """Проверка подписок."""
+        """Проверка подписок"""
         user = self.context["request"].user
         if value == user:
-            raise serializers.ValidationError(
-                "Подписаться на себя " "невозможно"
-            )
+            raise serializers.ValidationError("Подписаться на себя невозможно")
         if Follow.objects.filter(user=user, author=value).exists():
             raise serializers.ValidationError(
-                "Вы уже подписались на этого автора ранее"
-            )
+                "Вы уже подписались на этого автора")
         return value
+
+    def create(self, validated_data):
+        """Создание подписки"""
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

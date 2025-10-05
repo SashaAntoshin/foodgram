@@ -13,10 +13,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from users.utils import send_mail
 
 from .models import Follow, User
-from .paginations import CustomPagination
+from api.paginations import CustomPagination
 from .serializers import (
     UserListSerializer,
     UserRegistrationSerializer,
@@ -31,7 +30,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = CustomPagination
-    """Доп. логика для создания пользователя."""
 
     def get_permissions(self):
         if self.action in ["create", "list", "retrieve"]:
@@ -42,16 +40,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             return UserRegistrationSerializer
         return UserListSerializer
-
-    def perform_create(self, serializer):
-        """Пользователь и код подтверждения."""
-        user = serializer.save()
-        send_mail(
-            subject="Добро пожаловать!",
-            message="Вы успешно зарегистрированы!",
-            from_email=None,
-            recipient_list=[user.email],
-        )
 
     @action(
         detail=True,
@@ -64,23 +52,15 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
 
         if request.method == "POST":
-            if user == author:
-                return Response(
-                    {"detail": "Нельзя подписаться на себя"}, status=400
-                )
-            if Follow.objects.filter(user=user, author=author).exists():
-                return Response({"detail": "Вы уже подписаны"}, status=400)
-            Follow.objects.create(user=user, author=author)
-
-            recipes_limit = request.query_params.get("recipes_limit")
-            try:
-                recipes_limit = int(recipes_limit)
-            except (TypeError, ValueError):
-                recipes_limit = None
-
+            follow_serializer = FollowSerializer(
+                data={'author': author.id},
+                context={'request': request}
+            )
+            follow_serializer.is_valid(raise_exception=True)
+            follow_serializer.save(user=user)
             serializer = SubscriptionSerializer(
                 author,
-                context={"request": request, "recipes_limit": recipes_limit},
+                context={"request": request},
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -168,29 +148,6 @@ class ChangePassword(APIView):
         user.set_password(new_password)
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class LogoutView(APIView):
-    """Вью для выхода и удаления токена."""
-
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        """Удаление токена."""
-        try:
-            if request.auth:
-                request.auth.delete()
-            else:
-                from rest_framework.authtoken.models import Token
-
-                Token.objects.filter(user=request.user).delete()
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        except Exception:
-            return Response(
-                {"error": "Ошибка входа"}, status=status.HTTP_400_BAD_REQUEST
-            )
 
 
 class FollowViewSet(viewsets.ModelViewSet):

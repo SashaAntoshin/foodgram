@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 
 MAX_LENGTH = 150
@@ -9,6 +10,12 @@ class User(AbstractUser):
 
     username = models.CharField(
         max_length=MAX_LENGTH,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+\Z',
+                message='Разрешены только буквы, цифры и символы @/./+/-/_'
+            )
+        ],
         verbose_name="Имя пользователя",
         help_text="Обязательное поле",
     )

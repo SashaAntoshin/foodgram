@@ -84,17 +84,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Разрешены только буквы, цифры и символы @/./+/-/_"
             )
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError(
-                "Пользователь с таким username уже существует."
-            )
-        return value
-
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                "Пользователь с таким email уже существует."
-            )
         return value
 
     def create(self, validated_data):
@@ -126,28 +115,6 @@ class UserListSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         return False
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
-    def get_recipes(self, obj):
-        """Рецепты пользователя с ограничением через recipes_limit."""
-        request = self.context.get("request")
-        recipes_limit = None
-
-        if request:
-            recipes_limit = request.query_params.get("recipes_limit")
-
-        recipes = obj.recipes.all()
-
-        if recipes_limit and recipes_limit.isdigit():
-            recipes = recipes[: int(recipes_limit)]
-
-        from api.serializers import RecipeShortSerializer
-
-        return RecipeShortSerializer(
-            recipes, many=True, context=self.context
-        ).data
 
     def get_avatar(self, obj):
         """Вернём ссылку на аватар, если он есть."""
