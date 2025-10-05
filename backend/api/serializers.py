@@ -205,6 +205,12 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         ]
         IngredientsInRecipe.objects.bulk_create(ingredients_to_create)
 
+    def _set_tags_and_ingredients(self, recipe, tags_data, ingredients_data):
+        """Едины метод для тегов и ингредиентов."""
+        recipe.tags.set(tags_data)
+        recipe.ingredients_amounts.all().delete()
+        self._create_ingredients(recipe, ingredients_data)
+
     def create(self, validated_data):
         """Создание рецепта."""
         ingredients_data = validated_data.pop("ingredients")
@@ -212,7 +218,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags_data)
-        self._create_ingredients(recipe, ingredients_data)
+        self._set_tags_and_ingredients(recipe, tags_data, ingredients_data)
         return recipe
 
     def update(self, instance, validated_data):
@@ -230,9 +236,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             )
 
         instance = super().update(instance, validated_data)
-        instance.tags.set(tags_data)
-        instance.ingredients_amounts.all().delete()
-        self._create_ingredients(instance, ingredients_data)
+        self._set_tags_and_ingredients(instance, tags_data, ingredients_data)
 
         return instance
 
