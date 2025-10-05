@@ -16,10 +16,8 @@ SECRET_KEY = os.getenv(
 DEBUG = True  # os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.getenv(
-    'ALLOWED_HOSTS', 
-    'localhost,127.0.0.1,backend'
-).split(',')
-
+    "ALLOWED_HOSTS", "localhost,127.0.0.1,backend"
+).split(",")
 
 
 AUTH_USER_MODEL = "users.User"
@@ -53,9 +51,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS',
-    'https://foodisgood.duckdns.org,http://foodisgood.duckdns.org,http://localhost:3000,http://127.0.0.1:3000'
-).split(',')
+    "CORS_ALLOWED_ORIGINS",
+    "https://foodisgood.duckdns.org,http://foodisgood.duckdns.org,http://localhost:3000,http://127.0.0.1:3000",
+).split(",")
 
 CORS_ALLOW_CREDENTIALS = True
 

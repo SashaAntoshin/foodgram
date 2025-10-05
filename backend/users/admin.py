@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User
 
 
-class CustomRegistratonForm(forms.ModelForm):
+class CustomRegistrationForm(forms.ModelForm):
     """Форма создания пользователя через админку"""
 
     class Meta:
@@ -17,7 +17,7 @@ class CustomRegistratonForm(forms.ModelForm):
 class NewUserAdmin(UserAdmin):
     """Кастомная админка пользователя"""
 
-    add_form = CustomRegistratonForm
+    add_form = CustomRegistrationForm
     add_fieldsets = (
         (
             "Основная информация",
@@ -27,7 +27,7 @@ class NewUserAdmin(UserAdmin):
             },
         ),
     )
-    search_fields = ("email", "username")
+    search_fields = ("email", "username", "first_name", "last_name")
     list_filter = ("is_staff", "is_active")
     ordering = ("email",)
     list_display = ("email", "first_name", "last_name", "username")

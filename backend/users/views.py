@@ -1,12 +1,5 @@
-from api.serializers import (
-    AvatarUpdateSerializer,
-    FollowSerializer,
-    RecipeReadSerializer,
-    SubscriptionSerializer,
-)
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from recipes.models import Favorite
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
@@ -14,13 +7,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Follow, User
 from api.paginations import CustomPagination
+from api.serializers import (
+    AvatarUpdateSerializer,
+    FollowSerializer,
+    RecipeReadSerializer,
+    SubscriptionSerializer,
+)
+from recipes.models import Favorite
+
+from .models import Follow, User
 from .serializers import (
     UserListSerializer,
     UserRegistrationSerializer,
     UserSerializer,
 )
+
+User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -53,8 +56,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if request.method == "POST":
             follow_serializer = FollowSerializer(
-                data={'author': author.id},
-                context={'request': request}
+                data={"author": author.id}, context={"request": request}
             )
             follow_serializer.is_valid(raise_exception=True)
             follow_serializer.save(user=user)
@@ -65,10 +67,16 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == "DELETE":
-            follow = Follow.objects.filter(user=user, author=author).first()
-            if not follow:
-                return Response({"detail": "Подписка не найдена"}, status=400)
-            follow.delete()
+            deleted_count, _ = Follow.objects.filter(
+                user=user, author=author
+            ).delete()
+
+            if deleted_count == 0:
+                return Response(
+                    {"detail": "Подписка не найдена"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -179,7 +187,6 @@ class FollowViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post", "delete"])
     def subscribe(self, request, pk=None):
         """Подписаться / Отписаться."""
-        User = get_user_model()
         author = get_object_or_404(User, pk=pk)
 
         if request.method == "POST":

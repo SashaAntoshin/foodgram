@@ -11,7 +11,8 @@ class Tag(models.Model):
     """Модель тега рецепта."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH, unique=True, verbose_name="Тег")
+        max_length=MAX_LENGTH, unique=True, verbose_name="Тег"
+    )
     slug = models.SlugField(
         max_length=MAX_LENGTH,
         unique=True,

@@ -2,6 +2,8 @@ import base64
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from rest_framework import serializers
+
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -10,7 +12,6 @@ from recipes.models import (
     ShoppingBasket,
     Tag,
 )
-from rest_framework import serializers
 from users.models import Follow
 from users.serializers import UserListSerializer
 
@@ -290,12 +291,13 @@ class FollowSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Подписаться на себя невозможно")
         if Follow.objects.filter(user=user, author=value).exists():
             raise serializers.ValidationError(
-                "Вы уже подписались на этого автора")
+                "Вы уже подписались на этого автора"
+            )
         return value
 
     def create(self, validated_data):
         """Создание подписки"""
-        validated_data['user'] = self.context['request'].user
+        validated_data["user"] = self.context["request"].user
         return super().create(validated_data)
 
 

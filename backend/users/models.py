@@ -12,15 +12,14 @@ class User(AbstractUser):
         max_length=MAX_LENGTH,
         validators=[
             RegexValidator(
-                regex=r'^[\w.@+-]+\Z',
-                message='Разрешены только буквы, цифры и символы @/./+/-/_'
+                regex=r"^[\w.@+-]+\Z",
+                message="Разрешены только буквы, цифры и символы @/./+/-/_",
             )
         ],
         verbose_name="Имя пользователя",
         help_text="Обязательное поле",
     )
-    first_name = models.CharField(
-        max_length=MAX_LENGTH, verbose_name="Имя")
+    first_name = models.CharField(max_length=MAX_LENGTH, verbose_name="Имя")
     last_name = models.CharField(
         max_length=MAX_LENGTH,
         blank=False,
@@ -29,7 +28,8 @@ class User(AbstractUser):
     )
     bio = models.TextField(blank=True, verbose_name="Об авторе")
     email = models.EmailField(
-        max_length=256, unique=True, help_text="Обязательное поле")
+        max_length=256, unique=True, help_text="Обязательное поле"
+    )
     avatar = models.ImageField(
         upload_to="users/avatars", blank=True, null=True, verbose_name="аватар"
     )

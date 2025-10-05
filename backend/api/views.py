@@ -1,3 +1,10 @@
+from django.db.models import Sum
+from django.http import HttpResponse
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from api.serializers import (
     FavoritesSerializer,
     IngredientSerializer,
@@ -6,8 +13,6 @@ from api.serializers import (
     RecipeWriteSerializer,
     TagSerializer,
 )
-from django.db.models import Sum
-from django.http import HttpResponse
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -16,10 +21,6 @@ from recipes.models import (
     ShoppingBasket,
     Tag,
 )
-from rest_framework import filters, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrIsAdmin, IsAuthorOrReadOnly
@@ -190,19 +191,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         shopping_list = "Список покупок:\n\n"
         for ing in ingredients:
-            name = ing['ingredient__name']
-            amount = ing['total_amount']
-            unit = ing['ingredient__measurement_unit']
+            name = ing["ingredient__name"]
+            amount = ing["total_amount"]
+            unit = ing["ingredient__measurement_unit"]
             shopping_list += f"- {name} - {amount} {unit}\n"
         shopping_list += f"\nВсего ингредиентов: {len(ingredients)}"
         response = HttpResponse(
-            shopping_list, 
-            content_type="text/plain; charset=utf-8"
+            shopping_list, content_type="text/plain; charset=utf-8"
         )
         response["Content-Disposition"] = (
             'attachment; filename="shopping_list.txt"'
         )
         return response
+
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для Ингридиентов."""
