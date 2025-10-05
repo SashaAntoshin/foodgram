@@ -1,7 +1,7 @@
 """Регистрацияя моделей из приложения рецептов"""
 
 from django.contrib import admin
-from django.db.models import Count
+# from django.db.models import Count
 
 from .models import (
     Favorite,
