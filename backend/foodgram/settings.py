@@ -16,7 +16,8 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.getenv(
-    "ALLOWED_HOSTS", "localhost,127.0.0.1,backend,foodisgood.duckdns.org"
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1,89.169.171.59,backend,foodisgood.duckdns.org"
 ).split(",")
 
 CSRF_TRUSTED_ORIGINS = os.getenv(
