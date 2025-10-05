@@ -16,7 +16,7 @@ from api.serializers import (
 )
 from recipes.models import Favorite
 
-from .models import Follow, User
+from .models import Follow
 from .serializers import (
     UserListSerializer,
     UserRegistrationSerializer,
