@@ -22,7 +22,7 @@ from recipes.models import (
     Tag,
 )
 
-from .pagination import CustomPagination
+from .paginations import CustomPagination
 from .permissions import IsAuthorOrIsAdmin, IsAuthorOrReadOnly
 
 

@@ -134,7 +134,7 @@ class UserAvatarView(APIView):
         user = request.user
         if user.avatar:
             user.avatar.delete(save=True)
-        return Response(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ChangePassword(APIView):
