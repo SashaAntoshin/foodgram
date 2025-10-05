@@ -26,16 +26,16 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ("tags",)
     filter_horizontal = ("tags",)
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).annotate(
-            favorites_count=Count("favorites")
-        )
+    # def get_queryset(self, request):
+    #     return super().get_queryset(request).annotate(
+    #         favorites_count=Count("favorites")
+    #     )
 
-    def favorites_count(self, obj):
-        """Количество добавлений в избранное."""
-        return obj.favorites_count
-    favorites_count.short_description = "В избранном"
-    favorites_count.admin_order_field = "favorites_count"
+    # def favorites_count(self, obj):
+    #     """Количество добавлений в избранное."""
+    #     return obj.favorites_count
+    # favorites_count.short_description = "В избранном"
+    # favorites_count.admin_order_field = "favorites_count"
 
 
 @admin.register(Ingredient)
