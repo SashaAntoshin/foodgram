@@ -16,9 +16,8 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.getenv(
-    "ALLOWED_HOSTS,localhost,127.0.0.1,backend,foodisgood.duckdns.org"
+    "ALLOWED_HOSTS", "localhost,127.0.0.1,backend,foodisgood.duckdns.org"
 ).split(",")
-
 
 AUTH_USER_MODEL = "users.User"
 
