@@ -1,16 +1,10 @@
 """Регистрацияя моделей из приложения рецептов"""
 
 from django.contrib import admin
-# from django.db.models import Count
+from django.db.models import Count
 
-from .models import (
-    Favorite,
-    Ingredient,
-    IngredientsInRecipe,
-    Recipe,
-    ShoppingBasket,
-    Tag,
-)
+from .models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
+                     ShoppingBasket, Tag)
 
 
 @admin.register(Tag)
@@ -26,16 +20,19 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ("tags",)
     filter_horizontal = ("tags",)
 
-    # def get_queryset(self, request):
-    #     return super().get_queryset(request).annotate(
-    #         favorites_count=Count("favorites")
-    #     )
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(favorites_count=Count("favorites"))
+        )
 
-    # def favorites_count(self, obj):
-    #     """Количество добавлений в избранное."""
-    #     return obj.favorites_count
-    # favorites_count.short_description = "В избранном"
-    # favorites_count.admin_order_field = "favorites_count"
+    def favorites_count(self, obj):
+        """Количество добавлений в избранное."""
+        return obj.favorites_count
+
+    favorites_count.short_description = "В избранном"
+    favorites_count.admin_order_field = "favorites_count"
 
 
 @admin.register(Ingredient)

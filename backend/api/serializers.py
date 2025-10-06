@@ -4,14 +4,8 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    IngredientsInRecipe,
-    Recipe,
-    ShoppingBasket,
-    Tag,
-)
+from recipes.models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
+                            ShoppingBasket, Tag)
 from users.models import Follow
 from users.serializers import UserListSerializer
 
@@ -352,4 +346,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return RecipeShortSerializer(
             recipes, many=True, context=self.context
         ).data
-

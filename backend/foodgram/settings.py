@@ -17,15 +17,15 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.getenv(
     "ALLOWED_HOSTS",
-    "localhost,127.0.0.1,89.169.171.59,backend,foodisgood.duckdns.org"
+    "localhost,127.0.0.1,89.169.171.59,backend,foodisgood.duckdns.org",
 ).split(",")
 
 CSRF_TRUSTED_ORIGINS = os.getenv(
     "CSRF_TRUSTED_ORIGINS",
-    "https://foodisgood.duckdns.org,http://foodisgood.duckdns.org"
+    "https://foodisgood.duckdns.org,http://foodisgood.duckdns.org",
 ).split(",")
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django_filters',
+    "django_filters",
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
@@ -87,7 +87,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "foodgram.wsgi.application"
 
 
-if os.getenv("DB_HOST"):  # Если есть настройки PostgreSQL
+if os.getenv("DB_HOST"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -98,7 +98,7 @@ if os.getenv("DB_HOST"):  # Если есть настройки PostgreSQL
             "PORT": os.getenv("DB_PORT", 5432),
         }
     }
-else:  # Иначе используем SQLite для разработки
+else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -125,6 +125,9 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
@@ -158,11 +161,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR / "collected_static"
-
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),
-# ]
-
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

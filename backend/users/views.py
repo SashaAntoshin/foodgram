@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
@@ -9,20 +9,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.paginations import CustomPagination
-from api.serializers import (
-    AvatarUpdateSerializer,
-    FollowSerializer,
-    RecipeReadSerializer,
-    SubscriptionSerializer,
-)
+from api.serializers import (AvatarUpdateSerializer, FollowSerializer,
+                             RecipeReadSerializer, SubscriptionSerializer)
 from recipes.models import Favorite
 
 from .models import Follow
-from .serializers import (
-    UserListSerializer,
-    UserRegistrationSerializer,
-    UserSerializer,
-)
+from .serializers import (UserListSerializer, UserRegistrationSerializer,
+                          UserSerializer)
 
 User = get_user_model()
 
@@ -87,10 +80,10 @@ class UserViewSet(viewsets.ModelViewSet):
         """Список моих подписок."""
         user = request.user
         subscribed_authors = (
-        User.objects.filter(following__user=user)
-        .prefetch_related("recipes")
-        .annotate(recipes_count=Count("recipes"))
-    )
+            User.objects.filter(following__user=user)
+            .prefetch_related("recipes")
+            .annotate(recipes_count=Count("recipes"))
+        )
         page = self.paginate_queryset(subscribed_authors)
         serializer = SubscriptionSerializer(
             page, many=True, context={"request": request}
