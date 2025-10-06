@@ -7,7 +7,7 @@ from rest_framework import serializers
 from recipes.models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
                             ShoppingBasket, Tag)
 from users.models import Follow
-from users.serializers import UserListSerializer
+from .user_serializers import UserListSerializer
 
 User = get_user_model()
 

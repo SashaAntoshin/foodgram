@@ -13,9 +13,9 @@ from api.serializers import (AvatarUpdateSerializer, FollowSerializer,
                              RecipeReadSerializer, SubscriptionSerializer)
 from recipes.models import Favorite
 
-from .models import Follow
-from .serializers import (UserListSerializer, UserRegistrationSerializer,
-                          UserSerializer)
+from users.models import Follow
+from .user_serializers import (UserListSerializer, UserRegistrationSerializer,
+                               UserSerializer)
 
 User = get_user_model()
 
