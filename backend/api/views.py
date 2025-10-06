@@ -1,10 +1,11 @@
 from django.db.models import Sum
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
+from .filters import RecipeFilter
 from api.serializers import (
     FavoritesSerializer,
     IngredientSerializer,
@@ -27,49 +28,26 @@ from .permissions import IsAuthorOrIsAdmin, IsAuthorOrReadOnly
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """Вьюсет для рецептов"""
+
+    queryset = Recipe.objects.select_related("author").prefetch_related(
+        "tags", "ingredients_amounts__ingredient"
+    )
     permission_classes = [IsAuthorOrIsAdmin, IsAuthorOrReadOnly]
     pagination_class = CustomPagination
-    filterset_fields = ["author", "tags"]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
-    def get_queryset(self):
-        queryset = Recipe.objects.select_related("author").prefetch_related(
-            "tags", "ingredients_amounts__ingredient"
-        )
-
-        author_id = self.request.query_params.get("author")
-        if author_id:
-            queryset = queryset.filter(author_id=author_id)
-
-        tags = self.request.query_params.getlist("tags")
-        if tags:
-            queryset = queryset.filter(tags__slug__in=tags).distinct()
-
-        """Избранного."""
-        is_favorited = self.request.query_params.get("is_favorited")
-        if is_favorited == "1" and self.request.user.is_authenticated:
-            favorite_recipe_ids = Favorite.objects.filter(
-                user=self.request.user
-            ).values_list("recipe_id", flat=True)
-            queryset = queryset.filter(id__in=favorite_recipe_ids)
-
-        """Корзины."""
-        is_in_shopping_cart = self.request.query_params.get(
-            "is_in_shopping_cart"
-        )
-        if is_in_shopping_cart == "1" and self.request.user.is_authenticated:
-            cart_recipe_ids = ShoppingBasket.objects.filter(
-                user=self.request.user
-            ).values_list("recipe_id", flat=True)
-            queryset = queryset.filter(id__in=cart_recipe_ids)
-        return queryset
-
     def perform_create(self, serializer):
         self.instance = serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        self.instance = serializer.save()
 
     def create(self, request, *args, **kwargs):
         super().create(request, *args, **kwargs)
@@ -79,16 +57,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(read_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", True)
         instance = self.get_object()
-        write_serializer = RecipeWriteSerializer(
+        serializer = RecipeWriteSerializer(
             instance,
             data=request.data,
-            partial=partial,
+            partial=True,
             context={"request": request},
         )
-        write_serializer.is_valid(raise_exception=True)
-        self.perform_update(write_serializer)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
         read_serializer = RecipeReadSerializer(
             instance, context={"request": request}
         )
@@ -190,10 +167,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .annotate(total_amount=Sum("amount"))
         )
         shopping_list = "Список покупок:\n\n"
-        for ing in ingredients:
-            name = ing["ingredient__name"]
-            amount = ing["total_amount"]
-            unit = ing["ingredient__measurement_unit"]
+        for item in ingredients:
+            name = item["ingredient__name"]
+            amount = item["total_amount"]
+            unit = item["ingredient__measurement_unit"]
             shopping_list += f"- {name} - {amount} {unit}\n"
         shopping_list += f"\nВсего ингредиентов: {len(ingredients)}"
         response = HttpResponse(

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
@@ -85,7 +86,11 @@ class UserViewSet(viewsets.ModelViewSet):
     def subscriptions(self, request):
         """Список моих подписок."""
         user = request.user
-        subscribed_authors = User.objects.filter(following__user=user)
+        subscribed_authors = (
+        User.objects.filter(following__user=user)
+        .prefetch_related("recipes")
+        .annotate(recipes_count=Count("recipes"))
+    )
         page = self.paginate_queryset(subscribed_authors)
         serializer = SubscriptionSerializer(
             page, many=True, context={"request": request}
