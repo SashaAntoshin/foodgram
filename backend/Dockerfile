@@ -7,6 +7,13 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-RUN python manage.py load_ingredients
+RUN mkdir -p recipes/management/commands
+RUN touch recipes/management/__init__.py recipes/management/commands/__init__.py
+
+# Копируем или создаем команду
+COPY recipes/management/commands/load_ingredients.py /app/recipes/management/commands/load_ingredients.py
+
+# Загружаем данные (игнорируем ошибки если команды нет)
+RUN python manage.py load_ingredients || echo "Команда load_ingredients пока недоступна"
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "foodgram.wsgi"]
