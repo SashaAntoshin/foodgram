@@ -98,7 +98,19 @@ if os.getenv("DB_HOST"):
             "PORT": os.getenv("DB_PORT", 5432),
         }
     }
+else:  # Иначе используем SQLite для разработки 
 
+    DATABASES = { 
+
+        "default": { 
+
+            "ENGINE": "django.db.backends.sqlite3", 
+
+            "NAME": BASE_DIR / "db.sqlite3", 
+
+        } 
+
+    }
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",

@@ -1,4 +1,6 @@
 import base64
+import re
+from rest_framework.authtoken.models import Token
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
@@ -8,9 +10,130 @@ from recipes.models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
                             ShoppingBasket, Tag)
 from users.models import Follow
 
-from .user_serializers import UserListSerializer
 
 User = get_user_model()
+
+
+
+"""Сериализаторы для пользователей."""
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели пользователя."""
+
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "username",
+            "password",
+        )
+        extra_kwargs = {"password": {"write_only": True}}
+        username = serializers.CharField(max_length=150)
+
+    def get_is_subscribed(self, obj):
+        request_user = self.context["request"].user
+        if request_user.is_authenticated:
+            if obj == request_user:
+                return False
+            return obj.followers.filter(user=request_user).exists()
+        return False
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            request = self.context.get("request")
+            return (
+                request.build_absolute_uri(obj.avatar.url)
+                if request
+                else obj.avatar.url
+            )
+        return None
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    """Регистрация, валидация username и email."""
+
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "password",
+        )
+        extra_kwargs = {
+            "email": {"required": True},
+            "username": {"required": True},
+            "first_name": {"required": True},
+            "last_name": {"required": True},
+        }
+
+    def validate_username(self, value):
+        if not re.match(r"^[\w.@+-]+\Z", value):
+            raise serializers.ValidationError(
+                "Разрешены только буквы, цифры и символы @/./+/-/_"
+            )
+        return value
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        Token.objects.get_or_create(user=user)
+        return user
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    """Сериализатор информации о пользователе."""
+
+    is_subscribed = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "avatar",
+        )
+
+    def get_is_subscribed(self, obj):
+        return False
+
+    def get_avatar(self, obj):
+        """Вернём ссылку на аватар, если он есть."""
+        if obj.avatar:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
+
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
@@ -212,7 +335,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         tags_data = validated_data.pop("tags")
 
         recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags_data)
         self._set_tags_and_ingredients(recipe, tags_data, ingredients_data)
         return recipe
 
