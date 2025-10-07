@@ -54,28 +54,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         return context
 
-    # def create(self, request, *args, **kwargs):
-    #     super().create(request, *args, **kwargs)
-    #     read_serializer = RecipeReadSerializer(
-    #         self.instance, context={"request": self.request}
-    #     )
-    #     return Response(read_serializer.data, status=status.HTTP_201_CREATED)
-
-    # def partial_update(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = RecipeWriteSerializer(
-    #         instance,
-    #         data=request.data,
-    #         partial=True,
-    #         context={"request": request},
-    #     )
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_update(serializer)
-    #     read_serializer = RecipeReadSerializer(
-    #         instance, context={"request": request}
-    #     )
-    #     return Response(read_serializer.data)
-
     @action(detail=True, methods=["get"], url_path="get-link")
     def get_link(self, request, pk=None):
         """Получение ссылки на рецепт."""
