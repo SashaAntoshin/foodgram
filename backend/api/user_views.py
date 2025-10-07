@@ -12,8 +12,8 @@ from api.paginations import CustomPagination
 from api.serializers import (AvatarUpdateSerializer, FollowSerializer,
                              RecipeReadSerializer, SubscriptionSerializer)
 from recipes.models import Favorite
-
 from users.models import Follow
+
 from .user_serializers import (UserListSerializer, UserRegistrationSerializer,
                                UserSerializer)
 
