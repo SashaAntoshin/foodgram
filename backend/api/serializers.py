@@ -1,18 +1,16 @@
 import base64
 import re
-from rest_framework.authtoken.models import Token
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 from recipes.models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
                             ShoppingBasket, Tag)
 from users.models import Follow
 
-
 User = get_user_model()
-
 
 
 """Сериализаторы для пользователей."""
@@ -133,7 +131,6 @@ class UserListSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
         return None
-
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):

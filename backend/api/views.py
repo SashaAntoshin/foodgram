@@ -3,7 +3,6 @@ from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-
 from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
@@ -11,70 +10,34 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.paginations import CustomPagination
-from api.serializers import (
-    AvatarUpdateSerializer,
-    FavoritesSerializer,
-    FollowSerializer,
-    IngredientSerializer,
-    RecipeReadSerializer,
-    RecipeShortSerializer,
-    RecipeWriteSerializer,
-    SubscriptionSerializer,
-    TagSerializer,
-)
-
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    IngredientsInRecipe,
-    Recipe,
-    ShoppingBasket,
-    Tag,
-)
-
+from api.serializers import (AvatarUpdateSerializer, FavoritesSerializer,
+                             FollowSerializer, IngredientSerializer,
+                             RecipeReadSerializer, RecipeShortSerializer,
+                             RecipeWriteSerializer, ShopingBasketSerializer,
+                             SubscriptionSerializer, TagSerializer)
+from recipes.models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
+                            ShoppingBasket, Tag)
 from users.models import Follow
 
 from .filters import RecipeFilter
 from .paginations import CustomPagination
 from .permissions import IsAuthorOrIsAdmin, IsAuthorOrReadOnly
-from .serializers import (
-    UserListSerializer,
-    UserRegistrationSerializer,
-    UserSerializer,
-)
-
+from .serializers import (UserListSerializer, UserRegistrationSerializer,
+                          UserSerializer)
 
 User = get_user_model()
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для рецептов"""
 
+    queryset = Recipe.objects.select_related("author").prefetch_related(
+        "tags", "ingredients_amounts__ingredient"
+    )
     permission_classes = [IsAuthorOrIsAdmin, IsAuthorOrReadOnly]
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
-
-    def get_queryset(self):
-        queryset = Recipe.objects.select_related("author").prefetch_related(
-            "tags", "ingredients_amounts__ingredient"
-        )
-
-        is_favorited = self.request.query_params.get("is_favorited")
-        if is_favorited == "1" and self.request.user.is_authenticated:
-            favorite_ids = Favorite.objects.filter(
-                user=self.request.user
-            ).values_list("recipe_id", flat=True)
-            queryset = queryset.filter(id__in=favorite_ids)
-
-        is_in_cart = self.request.query_params.get("is_in_shopping_cart")
-        if is_in_cart == "1" and self.request.user.is_authenticated:
-            cart_ids = ShoppingBasket.objects.filter(
-                user=self.request.user
-            ).values_list("recipe_id", flat=True)
-            queryset = queryset.filter(id__in=cart_ids)
-
-        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
@@ -86,6 +49,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         self.instance = serializer.save()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        return context
 
     def create(self, request, *args, **kwargs):
         super().create(request, *args, **kwargs)
@@ -172,16 +139,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     {"detail": "Рецепт уже в корзине"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            ShoppingBasket.objects.create(user=user, recipe=recipe)
-            serializer = RecipeShortSerializer(
+            serializer = ShopingBasketSerializer(
+                data={"user": user.id, "recipe": recipe.id},
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            output_serializer = RecipeShortSerializer(
                 recipe, context={"request": request}
             )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                output_serializer.data, status=status.HTTP_201_CREATED
+            )
 
         elif request.method == "DELETE":
             """Удаление из корзины."""
-            # коллекция прошла, наверное опять я
-            # не понял твоего замечания, Роман)
             deleted_count, _ = ShoppingBasket.objects.filter(
                 user=user, recipe=recipe
             ).delete()
@@ -204,10 +176,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
         shopping_list = "Список покупок:\n\n"
-        for ing in ingredients:
-            name = ing["ingredient__name"]
-            amount = ing["total_amount"]
-            unit = ing["ingredient__measurement_unit"]
+        for item in ingredients:
+            name = item["ingredient__name"]
+            amount = item["total_amount"]
+            unit = item["ingredient__measurement_unit"]
             shopping_list += f"- {name} - {amount} {unit}\n"
         shopping_list += f"\nВсего ингредиентов: {len(ingredients)}"
 
@@ -429,10 +401,16 @@ class FollowViewSet(viewsets.ModelViewSet):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == "DELETE":
-            follow = get_object_or_404(
-                Follow, user=request.user, author=author
-            )
-            follow.delete()
+            deleted_count, _ = Follow.objects.filter(
+                user=request.user, author=author
+            ).delete()
+
+            if deleted_count == 0:
+                return Response(
+                    {"detail": "Подписка не найдена."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
