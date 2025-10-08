@@ -6,8 +6,14 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from recipes.models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
-                            ShoppingBasket, Tag)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    IngredientsInRecipe,
+    Recipe,
+    ShoppingBasket,
+    Tag,
+)
 from users.models import Follow
 
 User = get_user_model()
@@ -322,6 +328,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         from api.serializers import RecipeReadSerializer
+
         return RecipeReadSerializer(instance, context=self.context).data
 
     def _set_tags_and_ingredients(self, recipe, tags_data, ingredients_data):

@@ -1,29 +1,48 @@
+from urllib.parse import urljoin
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializers import (AvatarUpdateSerializer, FavoritesSerializer,
-                             FollowSerializer, IngredientSerializer,
-                             RecipeReadSerializer, RecipeShortSerializer,
-                             RecipeWriteSerializer, ShopingBasketSerializer,
-                             SubscriptionSerializer, TagSerializer)
-from recipes.models import (Favorite, Ingredient, IngredientsInRecipe, Recipe,
-                            ShoppingBasket, Tag)
+from api.serializers import (
+    AvatarUpdateSerializer,
+    FavoritesSerializer,
+    FollowSerializer,
+    IngredientSerializer,
+    RecipeReadSerializer,
+    RecipeShortSerializer,
+    RecipeWriteSerializer,
+    ShopingBasketSerializer,
+    SubscriptionSerializer,
+    TagSerializer,
+)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    IngredientsInRecipe,
+    Recipe,
+    ShoppingBasket,
+    Tag,
+)
 from users.models import Follow
 
-from .filters import RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .paginations import CustomPagination
 from .permissions import IsAuthorOrIsAdmin, IsAuthorOrReadOnly
-from .serializers import (UserListSerializer, UserRegistrationSerializer,
-                          UserSerializer)
+from .serializers import (
+    UserListSerializer,
+    UserRegistrationSerializer,
+    UserSerializer,
+)
 
 User = get_user_model()
 
@@ -41,7 +60,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['request'] = self.request
+        context["request"] = self.request
         return context
 
     def get_serializer_class(self):
@@ -57,10 +76,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="get-link")
     def get_link(self, request, pk=None):
-        """Получение ссылки на рецепт."""
+        """Получение ссылки на рецепт (на фронтенд)."""
         recipe = self.get_object()
-        recipe_url = request.build_absolute_uri(f"/recipes/{recipe.id}/")
-
+        frontend_base = getattr(settings, "FRONTEND_URL", None)
+        if frontend_base:
+            recipe_url = urljoin(
+                frontend_base.rstrip("/") + "/", f"recipes/{recipe.id}"
+            )
+        else:
+            recipe_url = request.build_absolute_uri(f"/recipes/{recipe.id}/")
         return Response({"short-link": recipe_url}, status=status.HTTP_200_OK)
 
     @action(
@@ -187,15 +211,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("^name",)
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        name = self.request.query_params.get("name")
-        if name:
-            queryset = queryset.filter(name__istartswith=name)
-        return queryset
+    filterset_class = IngredientFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
