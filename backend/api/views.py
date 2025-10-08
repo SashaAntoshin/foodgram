@@ -1,6 +1,4 @@
-from urllib.parse import urljoin
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Sum
 from django.http import HttpResponse
@@ -79,8 +77,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         recipe_url = request.build_absolute_uri(f"/recipes/{recipe.id}/")
         return Response({"short-link": recipe_url}, status=status.HTTP_200_OK)
-
-
 
     @action(
         detail=True,
