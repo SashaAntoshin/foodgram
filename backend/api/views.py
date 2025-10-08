@@ -39,6 +39,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
             return RecipeReadSerializer
@@ -49,10 +54,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         self.instance = serializer.save()
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        return context
 
     @action(detail=True, methods=["get"], url_path="get-link")
     def get_link(self, request, pk=None):

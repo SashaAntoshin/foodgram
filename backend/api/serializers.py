@@ -320,6 +320,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         ]
         IngredientsInRecipe.objects.bulk_create(ingredients_to_create)
 
+    def to_representation(self, instance):
+        from api.serializers import RecipeReadSerializer
+        return RecipeReadSerializer(instance, context=self.context).data
+
     def _set_tags_and_ingredients(self, recipe, tags_data, ingredients_data):
         """Едины метод для тегов и ингредиентов."""
         recipe.tags.set(tags_data)
