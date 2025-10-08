@@ -74,18 +74,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         self.instance = serializer.save()
 
-    @action(detail=True, methods=["get"], url_path="get-link")
+    @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
-        """Получение ссылки на рецепт (на фронтенд)."""
         recipe = self.get_object()
-        frontend_base = getattr(settings, "FRONTEND_URL", None)
-        if frontend_base:
-            recipe_url = urljoin(
-                frontend_base.rstrip("/") + "/", f"recipes/{recipe.id}"
-            )
-        else:
-            recipe_url = request.build_absolute_uri(f"/recipes/{recipe.id}/")
+        recipe_url = request.build_absolute_uri(f"/recipes/{recipe.id}/")
         return Response({"short-link": recipe_url}, status=status.HTTP_200_OK)
+
+
 
     @action(
         detail=True,
