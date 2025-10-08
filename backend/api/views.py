@@ -72,11 +72,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         self.instance = serializer.save()
 
-    @action(detail=True, methods=['get'], url_path='get-link')
+    @action(detail=True, methods=['get'], url_path='get-link',
+            permission_classes=[IsAuthorOrReadOnly])
     def get_link(self, request, pk=None):
         recipe = self.get_object()
-        recipe_url = request.build_absolute_uri(f"/recipes/{recipe.id}/")
-        return Response({"short-link": recipe_url}, status=status.HTTP_200_OK)
+        download_url = request.build_absolute_uri(
+            f'/api/recipes/{recipe.id}/get-link/')
+        return Response({'short-link': download_url})
 
     @action(
         detail=True,
