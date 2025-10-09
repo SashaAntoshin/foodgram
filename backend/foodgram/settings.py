@@ -25,6 +25,8 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
     "https://foodisgood.duckdns.org,http://foodisgood.duckdns.org",
 ).split(",")
 
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
