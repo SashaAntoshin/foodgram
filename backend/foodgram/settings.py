@@ -17,13 +17,13 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.getenv(
     "ALLOWED_HOSTS",
-    "localhost,127.0.0.1,89.169.171.59,backend,foodisgood.duckdns.org",
+    "localhost,127.0.0.1,89.169.171.59,backend,foodisgood.duckdns.org, 0.0.0.0,gateway",
 ).split(",")
 
 CSRF_TRUSTED_ORIGINS = os.getenv(
-    "CSRF_TRUSTED_ORIGINS",
-    "https://foodisgood.duckdns.org,http://foodisgood.duckdns.org",
-).split(",")
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000'
+).split(',')
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
