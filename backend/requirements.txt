@@ -17,6 +17,7 @@ dotenv==0.9.9
 drf-extra-fields==3.7.0
 filetype==1.2.0
 flake8==7.3.0
+gunicorn==21.2.0
 idna==3.10
 isort==6.0.1
 mccabe==0.7.0
