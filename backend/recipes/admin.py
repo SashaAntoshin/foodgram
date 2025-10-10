@@ -1,7 +1,6 @@
 """Регистрацияя моделей из приложения рецептов"""
 
 from django.contrib import admin
-from django.db.models import Count
 
 from .models import (
     Favorite,
@@ -25,13 +24,6 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ("name", "author__username")
     list_filter = ("tags",)
     filter_horizontal = ("tags",)
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .annotate(favorites_count=Count("favorites"))
-        )
 
     def favorites_count(self, obj):
         """Количество добавлений в избранное."""
