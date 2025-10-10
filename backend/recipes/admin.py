@@ -1,6 +1,7 @@
 """Регистрацияя моделей из приложения рецептов"""
-
+from django.db.models import Count
 from django.contrib import admin
+from admin_auto_filters.filters import AutocompleteFilter
 
 from .models import (
     Favorite,
@@ -12,6 +13,26 @@ from .models import (
 )
 
 
+class AutoFilter(AutocompleteFilter):
+    title = "Автор"
+    field_name = 'author'
+
+
+class TagFilter(AutocompleteFilter):
+    title = 'Теги'
+    field_name = "tags"
+
+
+class UserFilter(AutocompleteFilter):
+    title = "Пользователь"
+    field_name = "user"
+
+
+class RecipeFilter(AutocompleteFilter):
+    title = "Рецепт"
+    field_name = "recipe"
+
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ("name", "slug")
@@ -21,9 +42,17 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ("name", "author")
-    search_fields = ("name", "author__username")
-    list_filter = ("tags",)
-    filter_horizontal = ("tags",)
+    search_fields = ("name",)
+    list_filter = (AutoFilter, TagFilter)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("author")
+            .prefetch_related("tags", "ingredients_amounts__ingredient")
+            .annotate(favorites_count=(Count("saved")))
+        )
 
     def favorites_count(self, obj):
         """Количество добавлений в избранное."""
@@ -48,12 +77,10 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
 @admin.register(ShoppingBasket)
 class ShoppingBasketAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe", "added_at")
-    list_filter = ("added_at",)
-    search_fields = ("user__username", "recipe__name")
+    list_filter = (UserFilter, RecipeFilter)
 
 
 @admin.register(Favorite)
 class FavoritesAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe", "added_at")
-    list_filter = ("added_at",)
-    search_fields = ("user__username", "recipe__name")
+    list_filter = (UserFilter, RecipeFilter)

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
+    "admin_auto_filters",
     "djoser",
     "users",
     "recipes",
@@ -97,6 +98,7 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", 5432),
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
