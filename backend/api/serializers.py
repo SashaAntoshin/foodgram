@@ -133,7 +133,10 @@ class UserListSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             if obj == request.user:
                 return False
-            return obj.followers.filter(user=request.user).exists()
+            return Follow.objects.filter(
+                user=request.user, 
+                author=obj
+            ).exists()
         return False
 
     def get_avatar(self, obj):
