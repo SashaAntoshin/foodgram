@@ -73,14 +73,35 @@ class IngredientAdmin(admin.ModelAdmin):
 class IngredientInRecipeAdmin(admin.ModelAdmin):
     list_display = ("recipe", "ingredient", "amount")
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("recipe", "ingredient")
+        )
+
 
 @admin.register(ShoppingBasket)
 class ShoppingBasketAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe", "added_at")
     list_filter = (UserFilter, RecipeFilter)
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("user", "recipe")
+        )
+
 
 @admin.register(Favorite)
 class FavoritesAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe", "added_at")
     list_filter = (UserFilter, RecipeFilter)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("user", "recipe")
+        )
