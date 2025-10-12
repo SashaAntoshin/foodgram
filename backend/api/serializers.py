@@ -134,7 +134,7 @@ class UserListSerializer(serializers.ModelSerializer):
             if obj == request.user:
                 return False
             return Follow.objects.filter(
-                user=request.user, 
+                user=request.user,
                 author=obj
             ).exists()
         return False
