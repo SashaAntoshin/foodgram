@@ -26,6 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели пользователя."""
 
     password = serializers.CharField(write_only=True, required=True)
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -36,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "username",
             "password",
+            "is_subscribed",
         )
         extra_kwargs = {"password": {"write_only": True}}
         username = serializers.CharField(max_length=150)
